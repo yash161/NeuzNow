@@ -1,7 +1,8 @@
 {
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
+    "start": "export NODE_OPTIONS=--openssl-legacy-provider && expo start",
+
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -22,12 +23,15 @@
     "react-native": "^0.64.3",
     "react-native-event-listeners": "^1.0.7",
     "react-native-gesture-handler": "^1.10.3",
+    "react-native-paper": "^5.12.5",
     "react-native-reanimated": "^2.2.3",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "^3.9.0",
     "react-native-share": "^7.2.1",
+    "react-native-status-bar-height": "^2.6.0",
     "react-native-web": "0.17.1",
-    "react-native-webview": "^11.14.2"
+    "react-native-webview": "^11.14.2",
+    "yarn": "^1.22.22"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"
