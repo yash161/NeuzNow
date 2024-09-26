@@ -47,7 +47,6 @@ const DrawerNavigator = () => {
 
   return (
     <themeContext.Provider value={isEnabled === true ? theme.light : theme.dark}>
-      <NavigationContainer theme={isEnabled === true ? DarkTheme : DefaultTheme}>
         <Drawer.Navigator
           initialRouteName="Home"
           drawerContent={(props) => <DrawerContent {...props} />}
@@ -67,7 +66,6 @@ const DrawerNavigator = () => {
           <Drawer.Screen name="Japan" component={Japan} options={{headerShown: true}} />
           <Drawer.Screen name="Germany" component={Germany} options={{headerShown: true}} />
           </Drawer.Navigator>
-      </NavigationContainer>
     </themeContext.Provider>
   );
 }
