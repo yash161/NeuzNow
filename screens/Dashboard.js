@@ -19,7 +19,7 @@ export default function Dashboard({ navigation }) {
         onPress={() =>
           navigation.reset({
             index: 0,
-            routes: [{ name: 'StartScreen' }],
+            routes: [{ name: 'DrawerNavigator' }],
           })
         }
       >

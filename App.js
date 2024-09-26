@@ -1,41 +1,36 @@
-import React from 'react'
-import { Provider } from 'react-native-paper'
-import { NavigationContainer } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack'
-import { theme } from './core/theme'
-
+import React, { useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import LoginScreen from "./screens/LoginScreen";
 import DrawerNavigator from "./navigation/DrawerNavigator";
-import {
-  StartScreen,
-  LoginScreen,
-  RegisterScreen,
-  ResetPasswordScreen,
-  Dashboard,
-} from './screens/'
+import RegisterScreen from "./screens/RegisterScreen"
+// Create a Stack Navigator
+const Stack = createStackNavigator();
 
-// import {StartScreen} from './screens/StartScreen'
-const Stack = createStackNavigator()
-
-export default function App() {
+const App = () => {
   return (
-    <Provider theme={theme}>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="LoginScreen"
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="StartScreen" component={StartScreen} />
-          <Stack.Screen name="LoginScreen" component={LoginScreen} />
-          <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-          <Stack.Screen name="Dashboard" component={DrawerNavigator} />
-          <Stack.Screen
-            name="ResetPasswordScreen"
-            component={ResetPasswordScreen}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </Provider>
-  )
-}
+    <NavigationContainer>
+      <Stack.Navigator>
+        {/* LoginScreen */}
+        <Stack.Screen 
+          name="LoginScreen" 
+          component={LoginScreen} 
+          options={{ headerShown: false }} 
+        />
+         <Stack.Screen 
+          name="RegisterScreen" 
+          component={RegisterScreen} 
+          options={{ headerShown: false }} 
+        />
+        {/* DrawerNavigator */}
+        <Stack.Screen 
+          name="DrawerNavigator" 
+          component={DrawerNavigator} 
+          options={{ headerShown: false }} 
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+export default App;
