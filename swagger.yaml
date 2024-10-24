@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  title: My API
+  description: API documentation for my project
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+paths:
+  /api/v1/example:
+    get:
+      summary: Get example message
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
