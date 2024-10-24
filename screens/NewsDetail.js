@@ -1,29 +1,30 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, Linking, TouchableOpacity } from 'react-native';
 
 const NewsDetail = ({ route }) => {
   const { item } = route.params; // Access the passed news item
 
-  // Fallback content if the item is undefined or missing necessary fields
-  if (!item) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>News article not found.</Text>
-      </View>
-    );
-  }
-
   return (
     <ScrollView style={styles.container}>
-      {/* Display image if it exists */}
-      {item.urlToImage ? (
-        <Image source={{ uri: item.urlToImage }} style={styles.newsImage} />
-      ) : (
-        <View style={styles.placeholderImage} />
+      {item.urlToImage && (
+        <Image
+          source={{ uri: item.urlToImage }}
+          style={styles.newsImage}
+        />
       )}
-      <Text style={styles.newsTitle}>{item.title || 'No Title Available'}</Text>
-      <Text style={styles.newsDescription}>{item.description || 'No Description Available'}</Text>
-      <Text style={styles.newsContent}>{item.content || 'No Content Available'}</Text>
+      <Text style={styles.newsTitle}>{item.title}</Text>
+      <Text style={styles.newsDescription}>{item.description}</Text>
+      <Text style={styles.newsContent}>{item.content}</Text>
+      
+      {/* Display the article URL */}
+      <TouchableOpacity onPress={() => Linking.openURL(item.url)}>
+        <Text style={styles.articleUrl}>
+          Article URL: 
+          <Text style={styles.urlText}>
+            {item.url}
+          </Text>
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -37,13 +38,6 @@ const styles = StyleSheet.create({
   newsImage: {
     width: '100%',
     height: 200,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  placeholderImage: {
-    width: '100%',
-    height: 200,
-    backgroundColor: '#e0e0e0', // Placeholder background color
     borderRadius: 10,
     marginBottom: 10,
   },
@@ -61,11 +55,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
   },
-  errorText: {
-    fontSize: 18,
-    color: 'red',
-    textAlign: 'center',
+  articleUrl: {
     marginTop: 20,
+    fontSize: 16,
+    color: '#007BFF', // Change color to indicate clickable link
+  },
+  urlText: {
+    color: '#007BFF', // Use a consistent color for the link
+    textDecorationLine: 'underline', // Underline for better visibility
   },
 });
 
