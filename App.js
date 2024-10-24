@@ -1,33 +1,17 @@
-import React, { useState } from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import LoginScreen from "./screens/LoginScreen";
-import DrawerNavigator from "./navigation/DrawerNavigator";
-import RegisterScreen from "./screens/RegisterScreen"
-// Create a Stack Navigator
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import Home from './screens/Home';
+import NewsDetail from './screens/NewsDetail'; // Ensure the path is correct
+
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        {/* LoginScreen */}
-        <Stack.Screen 
-          name="LoginScreen" 
-          component={LoginScreen} 
-          options={{ headerShown: false }} 
-        />
-         <Stack.Screen 
-          name="RegisterScreen" 
-          component={RegisterScreen} 
-          options={{ headerShown: false }} 
-        />
-        {/* DrawerNavigator */}
-        <Stack.Screen 
-          name="DrawerNavigator" 
-          component={DrawerNavigator} 
-          options={{ headerShown: false }} 
-        />
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="NewsDetail" component={NewsDetail} />
       </Stack.Navigator>
     </NavigationContainer>
   );

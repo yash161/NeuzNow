@@ -1,5 +1,16 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, FlatList, ScrollView, StatusBar, Image, TouchableOpacity, Animated } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  Text,
+  FlatList,
+  ScrollView,
+  StatusBar,
+  Image,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import newAPI from '../apis/News';
 import Card from '../components/Card';
@@ -15,7 +26,7 @@ const Home = () => {
   const navigation = useNavigation();
   const theme = useContext(themeContext);
 
-  // Scrolling bar state
+  // Advertisement scrolling bar state
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const scrollAnim = new Animated.Value(0);
 
@@ -23,34 +34,37 @@ const Home = () => {
   const advertisements = [
     { id: '1', text: '🚀 Your Ad Here! 🚀' },
     { id: '2', text: '📣 Special Offer: 50% Off! 📣' },
-    { id: '3', text: '🎉 Join Our Newsletter for Updates! 🎉' }
+    { id: '3', text: '🎉 Join Our Newsletter for Updates! 🎉' },
   ];
 
+  // Fetch news on component mount
   useEffect(() => {
     getNewsFromAPI();
     startAdRotation();
   }, []);
 
-  function getNewsFromAPI() {
+  // Fetch news from API
+  const getNewsFromAPI = () => {
     newAPI.get('top-headlines?country=us&apiKey=1447d07f95c24384a8f4f010a21d5574')
-      .then(response => {
+      .then((response) => {
         setNews(response.data);
       })
-      .catch(error => {
-        console.log(error);
+      .catch((error) => {
+        console.error(error);
       })
       .finally(() => {
         setLoading(false);
       });
-  }
+  };
 
+  // Rotate advertisements
   const startAdRotation = () => {
     setInterval(() => {
-      setCurrentAdIndex(prevIndex => (prevIndex + 1) % advertisements.length);
+      setCurrentAdIndex((prevIndex) => (prevIndex + 1) % advertisements.length);
     }, 3000); // Change ad every 3 seconds
   };
 
-  // Scroll to the current advertisement
+  // Animate the scrolling banner
   useEffect(() => {
     Animated.spring(scrollAnim, {
       toValue: -currentAdIndex * 100, // Adjust based on height of each ad
@@ -58,28 +72,32 @@ const Home = () => {
     }).start();
   }, [currentAdIndex]);
 
-  if (!news) {
-    return null;
-  }
-
   const date = new Date().getDate();
-  const months = () => {
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return monthNames[new Date().getMonth()];
-  };
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June', 
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const currentMonth = monthNames[new Date().getMonth()];
 
   return (
-    <View style={{ backgroundColor: theme.backColor }}>
+    <View style={[styles.container, { backgroundColor: theme.backColor }]}>
       <StatusBar backgroundColor={theme.statusColor} />
+
+      {/* Header */}
       <View style={styles.headerContainer}>
         <View style={styles.logoContainer}>
           <Image
             source={require('../assets/img/header-logo.png')}
             style={styles.logo}
           />
-          <Text style={[styles.mainText, { marginLeft: -15, marginTop: -10 }]}>NeuzNow</Text>
+          <Text style={[styles.mainText, { color: theme.textColor }]}>
+            NeuzNow
+          </Text>
         </View>
       </View>
+
+      {/* Content */}
       <ScrollView>
         {/* Scrolling Advertisement Banner */}
         <View style={styles.bannerContainer}>
@@ -91,54 +109,60 @@ const Home = () => {
             ))}
           </Animated.View>
         </View>
-        
-        {/* Date Container with Calendar Icon */}
+
+        {/* Date with Calendar Icon */}
         <View style={styles.dateContainer}>
           <TouchableOpacity onPress={() => setShowCalendar(!showCalendar)} style={styles.calendarIconContainer}>
             <Icon name="calendar" size={24} color={theme.textColor} />
           </TouchableOpacity>
           <Text style={[styles.dateText, { color: theme.textColor }]}>
-            📅 {months()} {date}
+            📅 {currentMonth} {date}
           </Text>
         </View>
 
-        {/* Show Calendar when icon is clicked */}
+        {/* Calendar Component */}
         {showCalendar && <YourCalendarComponent />}
 
+        {/* Trending News Section */}
         <Text style={[styles.sectionTitle, { color: theme.textColor }]}>
           Trending News
         </Text>
-        {isLoading ? <ActivityIndicator size="large" color="#0096FF" /> : (
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#0096FF" />
+        ) : (
           <TrendNews />
         )}
+
+        {/* Separator */}
         <View style={styles.separator} />
+
+        {/* Recent News Section */}
         <Text style={[styles.sectionTitle, { color: theme.textColor }]}>
           Recent News
         </Text>
-        <FlatList
-          data={news.articles}
-          keyExtractor={(item, index) => 'key' + index}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => navigation.navigate('NewsDetail', { item })}>
-              <Card item={item} />
-            </TouchableOpacity>
-          )}
-          style={{ marginBottom: 65 }}
-        />
+        {isLoading ? ( // Show loader while loading
+          <ActivityIndicator size="large" color="#0096FF" />
+        ) : (
+          <FlatList
+            data={news.articles} // Assuming this holds your news articles
+            keyExtractor={(item, index) => 'key' + index}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => navigation.navigate('NewsDetail', { item })}>
+                <Card item={item} />
+              </TouchableOpacity>
+            )}
+            style={{ marginBottom: 65 }}
+          />
+        )}
       </ScrollView>
     </View>
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
-  mainText: {
-    color: 'white',
-    fontSize: 28,
-    fontWeight: 'bold',
-    margin: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingRight: 60,
+  container: {
+    flex: 1,
   },
   headerContainer: {
     backgroundColor: '#638cbd',
@@ -155,6 +179,12 @@ const styles = StyleSheet.create({
   logo: {
     width: 100,
     height: 100,
+  },
+  mainText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginLeft: -15,
+    marginTop: -10,
   },
   bannerContainer: {
     height: 100, // Adjust this height for your banner

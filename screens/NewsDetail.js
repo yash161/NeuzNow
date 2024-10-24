@@ -1,62 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, Dimensions, ActivityIndicator, Linking } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 
 const NewsDetail = ({ route }) => {
-  const { item } = route.params;
-  const [summary, setSummary] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [imageError, setImageError] = useState(false);
+  const { item } = route.params; // Access the passed news item
 
-  // Function to summarize the content
-  const summarizeContent = async (content) => {
-    try {
-      const summarized = await generateSummary(content); // Example function
-      setSummary(summarized);
-    } catch (error) {
-      console.error('Failed to summarize content:', error);
-      setSummary(content); // Fallback to original content if summarization fails
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (item.content) {
-      summarizeContent(item.content);
-    } else {
-      setSummary(item.description); // Fallback if content is missing
-      setLoading(false);
-    }
-  }, []);
-
-  // Example function for generating summary (replace with actual implementation)
-  const generateSummary = async (content) => {
-    const words = content.split(' ');
-    return words.slice(0, 60).join(' ') + '...';
-  };
+  // Fallback content if the item is undefined or missing necessary fields
+  if (!item) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>News article not found.</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
-      <Image
-        source={{ uri: item.urlToImage }}
-        style={styles.image}
-        onError={() => setImageError(true)}
-      />
-      {imageError && (
-        <Text style={styles.imageErrorText}>
-          Image failed to load. Please check your connection or try again later.
-        </Text>
-      )}
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.author}>By: {item.author}</Text>
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+      {/* Display image if it exists */}
+      {item.urlToImage ? (
+        <Image source={{ uri: item.urlToImage }} style={styles.newsImage} />
       ) : (
-        <Text style={styles.content}>{summary}</Text>
+        <View style={styles.placeholderImage} />
       )}
-      <Text style={styles.readMore} onPress={() => Linking.openURL(item.url)}>
-        Read the full article here
-      </Text>
+      <Text style={styles.newsTitle}>{item.title || 'No Title Available'}</Text>
+      <Text style={styles.newsDescription}>{item.description || 'No Description Available'}</Text>
+      <Text style={styles.newsContent}>{item.content || 'No Content Available'}</Text>
     </ScrollView>
   );
 };
@@ -64,38 +31,41 @@ const NewsDetail = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    padding: 16,
+    backgroundColor: '#fff',
   },
-  image: {
+  newsImage: {
     width: '100%',
     height: 200,
     borderRadius: 10,
     marginBottom: 10,
   },
-  imageErrorText: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginVertical: 10,
-  },
-  author: {
-    fontSize: 16,
-    fontStyle: 'italic',
+  placeholderImage: {
+    width: '100%',
+    height: 200,
+    backgroundColor: '#e0e0e0', // Placeholder background color
+    borderRadius: 10,
     marginBottom: 10,
   },
-  content: {
-    fontSize: 18,
+  newsTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
-  readMore: {
-    color: 'blue',
-    marginTop: 20,
+  newsDescription: {
+    fontSize: 18,
+    marginBottom: 15,
+    color: '#555',
+  },
+  newsContent: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  errorText: {
+    fontSize: 18,
+    color: 'red',
     textAlign: 'center',
-    textDecorationLine: 'underline',
+    marginTop: 20,
   },
 });
 
