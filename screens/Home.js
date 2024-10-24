@@ -12,17 +12,21 @@ import {
   Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'; // Import bottom tab navigator
+import Icon from 'react-native-vector-icons/FontAwesome';
 import newAPI from '../apis/News';
 import Card from '../components/Card';
 import TrendNews from '../screens/TrendNews';
-import YourCalendarComponent from '../components/YourCalendarComponent'; // Import your calendar component
+import YourCalendarComponent from '../components/YourCalendarComponent'; 
 import themeContext from '../config/themeContext';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import icon library
 
-const Home = () => {
+// Create a bottom tab navigator
+const Tab = createBottomTabNavigator();
+
+const HomeScreen = () => {
   const [isLoading, setLoading] = useState(true);
   const [news, setNews] = useState([]);
-  const [showCalendar, setShowCalendar] = useState(false); // State to manage calendar visibility
+  const [showCalendar, setShowCalendar] = useState(false);
   const navigation = useNavigation();
   const theme = useContext(themeContext);
 
@@ -43,7 +47,6 @@ const Home = () => {
     startAdRotation();
   }, []);
 
-  // Fetch news from API
   const getNewsFromAPI = () => {
     newAPI.get('top-headlines?country=us&apiKey=1447d07f95c24384a8f4f010a21d5574')
       .then((response) => {
@@ -57,17 +60,15 @@ const Home = () => {
       });
   };
 
-  // Rotate advertisements
   const startAdRotation = () => {
     setInterval(() => {
       setCurrentAdIndex((prevIndex) => (prevIndex + 1) % advertisements.length);
-    }, 3000); // Change ad every 3 seconds
+    }, 3000); 
   };
 
-  // Animate the scrolling banner
   useEffect(() => {
     Animated.spring(scrollAnim, {
-      toValue: -currentAdIndex * 100, // Adjust based on height of each ad
+      toValue: -currentAdIndex * 100,
       useNativeDriver: true,
     }).start();
   }, [currentAdIndex]);
@@ -140,11 +141,11 @@ const Home = () => {
         <Text style={[styles.sectionTitle, { color: theme.textColor }]}>
           Recent News
         </Text>
-        {isLoading ? ( // Show loader while loading
+        {isLoading ? (
           <ActivityIndicator size="large" color="#0096FF" />
         ) : (
           <FlatList
-            data={news.articles} // Assuming this holds your news articles
+            data={news.articles}
             keyExtractor={(item, index) => 'key' + index}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => navigation.navigate('NewsDetail', { item })}>
@@ -156,6 +157,70 @@ const Home = () => {
         )}
       </ScrollView>
     </View>
+  );
+};
+
+// Dummy screens for each tab
+const SportsScreen = () => <Text>Sports Screen</Text>;
+const HealthScreen = () => <Text>Health Screen</Text>;
+const EntertainmentScreen = () => <Text>Entertainment Screen</Text>;
+const GlobalScreen = () => <Text>Global Screen</Text>;
+const LatestScreen = () => <Text>Latest Screen</Text>;
+
+const Home = () => {
+  return (
+    <Tab.Navigator>
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarLabel: 'Latest',
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="newspaper-o" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Sports"
+        component={SportsScreen}
+        options={{
+          tabBarLabel: 'Sports',
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="soccer-ball-o" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Health"
+        component={HealthScreen}
+        options={{
+          tabBarLabel: 'Health',
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="heartbeat" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Entertainment"
+        component={EntertainmentScreen}
+        options={{
+          tabBarLabel: 'Entertainment',
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="film" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Global"
+        component={GlobalScreen}
+        options={{
+          tabBarLabel: 'Global',
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="globe" color={color} size={size} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
   );
 };
 
