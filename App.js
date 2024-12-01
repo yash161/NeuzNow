@@ -23,6 +23,11 @@ const App = () => {
           component={Home} 
           options={{ headerShown: false }} 
         />
+        <Stack.Screen 
+          name="RegisterScreen" 
+          component={RegisterScreen} 
+          options={{ headerShown: false }} 
+        />
         {/* DrawerNavigator
         <Stack.Screen 
           name="DrawerNavigator" 

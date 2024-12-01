@@ -6,6 +6,7 @@ const fetch = require('node-fetch');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const cheerio = require('cheerio');
 const axios = require('axios');
+const bcrypt = require('bcryptjs');
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
@@ -46,7 +47,7 @@ async function generateSummary(text) {
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  const sql = 'SELECT * FROM users WHERE email = ? AND password = ?';
+  const sql = 'SELECT * FROM User_details WHERE email = ? AND password = ?';
   db.query(sql, [email, password], (err, results) => {
     if (err) {
       res.status(500).json({ message: 'An error occurred during login.' });
@@ -56,6 +57,46 @@ app.post('/login', (req, res) => {
       res.status(401).json({ message: 'Invalid email or password' });
     }
   });
+});
+
+app.post('/register', async (req, res) => {
+  const { name, email, password, retypePassword, role } = req.body;
+
+  // Validate inputs
+  if (!name || !email || !password || !retypePassword) {
+    return res.status(400).json({ message: 'Please fill in all fields.' });
+  }
+  if (password !== retypePassword) {
+    return res.status(400).json({ message: "Passwords don't match." });
+  }
+
+  try {
+    // Check if the user already exists
+    const [existingUser] = await db.promise().query(
+      'SELECT * FROM users WHERE email = ?',
+      [email]
+    );
+    if (existingUser.length > 0) {
+      return res.status(400).json({ message: 'Email already in use.' });
+    }
+
+    // Hash the password before storing
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert the new user into the database
+    const sql = 'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)';
+    db.query(sql, [name, email, hashedPassword, role], (err) => {
+      if (err) {
+        console.error('Error inserting user:', err);
+        return res.status(500).json({ message: 'Error registering user.' });
+      }
+      res.status(201).json({ message: 'User registered successfully.' });
+    });
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
 });
 
 

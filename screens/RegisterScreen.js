@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Picker } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Picker, Alert } from 'react-native'; // Added Alert for response messages
 import { Text } from 'react-native-paper';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
@@ -11,6 +11,7 @@ import { theme } from '../core/theme';
 import { emailValidator } from '../helpers/emailValidator';
 import { passwordValidator } from '../helpers/passwordValidator';
 import { nameValidator } from '../helpers/nameValidator';
+import axios from 'axios'; // Import axios for API calls
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState({ value: '', error: '' });
@@ -19,7 +20,7 @@ export default function RegisterScreen({ navigation }) {
   const [retypePassword, setRetypePassword] = useState({ value: '', error: '' });
   const [role, setRole] = useState('User'); // Default role
 
-  const onSignUpPressed = () => {
+  const onSignUpPressed = async () => {
     const nameError = nameValidator(name.value);
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
@@ -32,10 +33,33 @@ export default function RegisterScreen({ navigation }) {
       setRetypePassword({ ...retypePassword, error: retypePasswordError });
       return;
     }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Dashboard' }],
-    });
+
+    // Send data to the backend
+    try {
+      const response = await axios.post('http://127.0.0.1:3000/register', {
+        name: name.value,
+        email: email.value,
+        password: password.value,
+        retypePassword: retypePassword.value,
+        role: role,
+      });
+
+      // Handle the response
+      if (response.status === 201) {
+        Alert.alert('Success', 'Registration successful!');
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Dashboard' }],
+        });
+      }
+    } catch (error) {
+      // Display error message from the backend
+      if (error.response && error.response.data) {
+        Alert.alert('Error', error.response.data.message);
+      } else {
+        Alert.alert('Error', 'Something went wrong. Please try again later.');
+      }
+    }
   };
 
   return (
