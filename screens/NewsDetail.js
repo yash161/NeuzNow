@@ -1,8 +1,25 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, Linking, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 
 const NewsDetail = ({ route }) => {
-  const { item } = route.params; // Access the passed news item
+  const { item } = route.params;
+  const [summary, setSummary] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/proxy?url=${encodeURIComponent(item.url)}`); // Using proxy server
+        const data = await response.json(); // Expecting JSON response
+        setSummary(data.summary); // Display the summary
+      } catch (error) {
+        console.error('Error fetching URL content:', error);
+        setErrorMessage('Failed to fetch URL content.');
+      }
+    };
+
+    fetchContent();
+  }, [item.url]);
 
   return (
     <ScrollView style={styles.container}>
@@ -13,21 +30,19 @@ const NewsDetail = ({ route }) => {
         />
       )}
       <Text style={styles.newsTitle}>{item.title}</Text>
-      <Text style={styles.newsDescription}>{item.description}</Text>
-      <Text style={styles.newsContent}>{item.content}</Text>
       
-      {/* Display the article URL */}
-      <TouchableOpacity onPress={() => Linking.openURL(item.url)}>
-        <Text style={styles.articleUrl}>
-          Article URL: 
-          <Text style={styles.urlText}>
-            {item.url}
-          </Text>
-        </Text>
-      </TouchableOpacity>
+      {/* Display fetched summary or error */}
+      {summary ? (
+        <>
+          <Text style={styles.summaryTitle}>Summary:</Text> {/* Bold title for summary */}
+          <Text style={styles.fetchedContent}>{summary}</Text>
+        </>
+      ) : (
+        <Text style={styles.errorMessage}>{errorMessage}</Text>
+      )}
     </ScrollView>
   );
-};
+};  
 
 const styles = StyleSheet.create({
   container: {
@@ -55,14 +70,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
   },
-  articleUrl: {
+  summaryTitle: {
+    fontSize: 20,  // Increased font size for summary title
+    fontWeight: 'bold', // Bold style for summary title
+    marginTop: 10,
+  },
+  fetchedContent: {
     marginTop: 20,
     fontSize: 16,
-    color: '#007BFF', // Change color to indicate clickable link
+    color: '#000',
   },
-  urlText: {
-    color: '#007BFF', // Use a consistent color for the link
-    textDecorationLine: 'underline', // Underline for better visibility
+  errorMessage: {
+    marginTop: 20,
+    fontSize: 16,
+    color: 'red',
   },
 });
 
