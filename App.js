@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import LoginScreen from "./screens/LoginScreen";
 import DrawerNavigator from "./navigation/DrawerNavigator";
 import Home from "./screens/Home";
+import AdminDashboard from "./screens/Admin";
 import RegisterScreen from "./screens/RegisterScreen"
 // Create a Stack Navigator
 const Stack = createStackNavigator();
@@ -26,6 +27,11 @@ const App = () => {
         <Stack.Screen 
           name="RegisterScreen" 
           component={RegisterScreen} 
+          options={{ headerShown: false }} 
+        />
+         <Stack.Screen 
+          name="AdminDashboard" 
+          component={AdminDashboard} 
           options={{ headerShown: false }} 
         />
         {/* DrawerNavigator

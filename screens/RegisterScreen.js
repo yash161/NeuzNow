@@ -9,6 +9,8 @@ import TextInput from '../components/TextInput';
 import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import { emailValidator } from '../helpers/emailValidator';
+// import AdminDashboard from "./screens/Admin";
+import AdminDashboard from './Admin';
 import { passwordValidator } from '../helpers/passwordValidator';
 import { nameValidator } from '../helpers/nameValidator';
 import axios from 'axios'; // Import axios for API calls
@@ -47,10 +49,29 @@ export default function RegisterScreen({ navigation }) {
       // Handle the response
       if (response.status === 201) {
         Alert.alert('Success', 'Registration successful!');
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Dashboard' }],
-        });
+  
+        // Log and ensure that the role-based redirect is being reached
+        console.log(`Role is ${role}. Proceeding with redirection...`);
+        
+        if (role === 'Admin') {
+          console.log("Redirected to admin panel");
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'AdminDashboard' }], // Redirect to Admin Page if role is Admin
+          });
+        } else if (role === 'Author') {
+          console.log("Redirected to author page");
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'AuthorPage' }], // Redirect to Author Page if role is Author
+          });
+        } else {
+          console.log("Redirected to user dashboard");
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Dashboard' }], // Default redirect for other roles (User, Student)
+          });
+        }
       }
     } catch (error) {
       // Display error message from the backend
@@ -113,6 +134,7 @@ export default function RegisterScreen({ navigation }) {
         <Picker.Item label="User" value="User" />
         <Picker.Item label="Author" value="Author" />
         <Picker.Item label="Student" value="Student" />
+        <Picker.Item label="Admin" value="Admin" /> {/* Added Admin role */}
       </Picker>
       <Button
         mode="contained"
