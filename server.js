@@ -47,7 +47,7 @@ async function generateSummary(text) {
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  const sql = 'SELECT * FROM User_details WHERE email = ? AND password = ?';
+  const sql = 'SELECT * FROM users WHERE email = ? AND password = ?';
   db.query(sql, [email, password], (err, results) => {
     if (err) {
       res.status(500).json({ message: 'An error occurred during login.' });
