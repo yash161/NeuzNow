@@ -41,7 +41,7 @@ export default function LoginScreen({ navigation }) {
   
       if (response.ok) {
         // Login was successful, navigate to the DrawerNavigator
-        navigation.replace('DrawerNavigator');
+        navigation.replace('Home');
       } else {
         // Show error message
         setEmail({ ...email, error: jsonResponse.message });
