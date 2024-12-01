@@ -1,53 +1,41 @@
 import React, { useEffect, useState, useContext } from 'react';
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  Text,
-  FlatList,
-  ScrollView,
-  StatusBar,
-  Image,
-  TouchableOpacity,
-  Animated,
-} from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, FlatList, ScrollView, StatusBar, Image, TouchableOpacity, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import newAPI from '../apis/News';
 import Card from '../components/Card';
-import TrendNews from '../screens/TrendNews';
-import YourCalendarComponent from '../components/YourCalendarComponent'; // Import your calendar component
+import YourCalendarComponent from '../components/YourCalendarComponent';
 import themeContext from '../config/themeContext';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import icon library
+import { LinearGradient } from 'expo-linear-gradient';
 
-const Home = () => {
+const Tab = createBottomTabNavigator();
+
+const HomeScreen = () => {
   const [isLoading, setLoading] = useState(true);
   const [news, setNews] = useState([]);
-  const [showCalendar, setShowCalendar] = useState(false); // State to manage calendar visibility
+  const [showCalendar, setShowCalendar] = useState(false);
   const navigation = useNavigation();
   const theme = useContext(themeContext);
 
-  // Advertisement scrolling bar state
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
   const scrollAnim = new Animated.Value(0);
 
-  // Define your advertisements
   const advertisements = [
-    { id: '1', text: '🚀 Your Ad Here! 🚀' },
-    { id: '2', text: '📣 Special Offer: 50% Off! 📣' },
-    { id: '3', text: '🎉 Join Our Newsletter for Updates! 🎉' },
+    { id: '1', text: '🚀 Your Ad Here! 🚀', color: '#FF6B6B' },
+    { id: '2', text: '📣 Special Offer: 50% Off! 📣', color: '#4ECDC4' },
+    { id: '3', text: '🎉 Join Our Newsletter for Updates! 🎉', color: '#45B649' },
   ];
 
-  // Fetch news on component mount
   useEffect(() => {
     getNewsFromAPI();
     startAdRotation();
   }, []);
 
-  // Fetch news from API
   const getNewsFromAPI = () => {
     newAPI.get('top-headlines?country=us&apiKey=1447d07f95c24384a8f4f010a21d5574')
       .then((response) => {
-        setNews(response.data);
+        setNews(response.data.articles);
       })
       .catch((error) => {
         console.error(error);
@@ -57,188 +45,240 @@ const Home = () => {
       });
   };
 
-  // Rotate advertisements
   const startAdRotation = () => {
     setInterval(() => {
       setCurrentAdIndex((prevIndex) => (prevIndex + 1) % advertisements.length);
-    }, 3000); // Change ad every 3 seconds
+    }, 3000);
   };
 
-  // Animate the scrolling banner
   useEffect(() => {
     Animated.spring(scrollAnim, {
-      toValue: -currentAdIndex * 100, // Adjust based on height of each ad
+      toValue: -currentAdIndex * 100,
       useNativeDriver: true,
     }).start();
   }, [currentAdIndex]);
 
   const date = new Date().getDate();
-  const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June', 
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+    'July', 'August', 'September', 'October', 'November', 'December'];
   const currentMonth = monthNames[new Date().getMonth()];
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backColor }]}>
       <StatusBar backgroundColor={theme.statusColor} />
 
-      {/* Header */}
-      <View style={styles.headerContainer}>
+      <LinearGradient
+        colors={['#4c669f', '#3b5998', '#192f6a']}
+        style={styles.headerContainer}>
         <View style={styles.logoContainer}>
           <Image
             source={require('../assets/img/header-logo.png')}
             style={styles.logo}
           />
-          <Text style={[styles.mainText, { color: theme.textColor }]}>
+          <Text style={[styles.mainText, { color: '#fff' }]}>
             NeuzNow
           </Text>
         </View>
-      </View>
+      </LinearGradient>
 
-      {/* Content */}
       <ScrollView>
-        {/* Scrolling Advertisement Banner */}
         <View style={styles.bannerContainer}>
           <Animated.View style={[styles.banner, { transform: [{ translateY: scrollAnim }] }]}>
             {advertisements.map((ad) => (
-              <View key={ad.id} style={styles.bannerItem}>
+              <LinearGradient
+                key={ad.id}
+                colors={[ad.color, '#fff']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.bannerItem}>
                 <Text style={styles.bannerText}>{ad.text}</Text>
-              </View>
+              </LinearGradient>
             ))}
           </Animated.View>
         </View>
 
-        {/* Date with Calendar Icon */}
-        <View style={styles.dateContainer}>
-          <TouchableOpacity onPress={() => setShowCalendar(!showCalendar)} style={styles.calendarIconContainer}>
-            <Icon name="calendar" size={24} color={theme.textColor} />
-          </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setShowCalendar(!showCalendar)}
+          style={styles.dateContainer}>
+          <Icon name="calendar-alt" size={24} color={theme.textColor} />
           <Text style={[styles.dateText, { color: theme.textColor }]}>
-            📅 {currentMonth} {date}
+            {currentMonth} {date}
           </Text>
-        </View>
+        </TouchableOpacity>
 
-        {/* Calendar Component */}
         {showCalendar && <YourCalendarComponent />}
 
-        {/* Trending News Section */}
         <Text style={[styles.sectionTitle, { color: theme.textColor }]}>
           Trending News
         </Text>
         {isLoading ? (
           <ActivityIndicator size="large" color="#0096FF" />
         ) : (
-          <TrendNews />
-        )}
-
-        {/* Separator */}
-        <View style={styles.separator} />
-
-        {/* Recent News Section */}
-        <Text style={[styles.sectionTitle, { color: theme.textColor }]}>
-          Recent News
-        </Text>
-        {isLoading ? ( // Show loader while loading
-          <ActivityIndicator size="large" color="#0096FF" />
-        ) : (
           <FlatList
-            data={news.articles} // Assuming this holds your news articles
+            data={news}
             keyExtractor={(item, index) => 'key' + index}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => navigation.navigate('NewsDetail', { item })}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('NewsDetail', { item })}>
                 <Card item={item} />
               </TouchableOpacity>
             )}
-            style={{ marginBottom: 65 }}
           />
         )}
+
+        <View style={styles.separator} />
       </ScrollView>
     </View>
   );
 };
 
-// Styles
+const NewsScreen = ({ category }) => {
+  const [isLoading, setLoading] = useState(true);
+  const [news, setNews] = useState([]);
+  const navigation = useNavigation();
+  const theme = useContext(themeContext);
+
+  useEffect(() => {
+    getNewsFromAPI();
+  }, []);
+
+  const getNewsFromAPI = () => {
+    newAPI.get(`top-headlines?country=us&category=${category}&apiKey=920deb9f754348c0bec4871fef36d971`)
+      .then((response) => {
+        setNews(response.data.articles);
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.backColor }]}>
+      <LinearGradient
+        colors={['#4c669f', '#3b5998', '#192f6a']}
+        style={styles.headerContainer}>
+        <Text style={styles.categoryTitle}>
+          {category.charAt(0).toUpperCase() + category.slice(1)} News
+        </Text>
+      </LinearGradient>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#0096FF" />
+      ) : (
+        <FlatList
+          data={news}
+          keyExtractor={(item, index) => 'key' + index}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('NewsDetail', { item })}>
+              <Card item={item} />
+            </TouchableOpacity>
+          )}
+          style={{ marginBottom: 65 }}
+        />
+      )}
+    </View>
+  );
+};
+
+const App = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === 'Home') {
+            iconName = 'home';
+          } else if (route.name === 'Sports') {
+            iconName = 'football-ball';
+          } else if (route.name === 'Health') {
+            iconName = 'heartbeat';
+          } else if (route.name === 'Tech') {
+            iconName = 'microchip';
+          } else if (route.name === 'Business') {
+            iconName = 'briefcase';
+          }
+
+          return <Icon name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: '#4c669f',
+        tabBarInactiveTintColor: 'gray',
+        tabBarStyle: { paddingBottom: 5 },
+      })}>
+      <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Sports" component={() => <NewsScreen category="sports" />} options={{ headerShown: false }} />
+      <Tab.Screen name="Health" component={() => <NewsScreen category="health" />} options={{ headerShown: false }} />
+      <Tab.Screen name="Tech" component={() => <NewsScreen category="technology" />} options={{ headerShown: false }} />
+      <Tab.Screen name="Business" component={() => <NewsScreen category="business" />} options={{ headerShown: false }} />
+    </Tab.Navigator>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
   headerContainer: {
-    backgroundColor: '#638cbd',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    elevation: 8,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    height: 100,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 40,
+    height: 40,
+    marginRight: 10,
   },
   mainText: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginLeft: -15,
-    marginTop: -10,
   },
   bannerContainer: {
-    height: 100, // Adjust this height for your banner
-    overflow: 'hidden', // Hide overflow for smooth scrolling
-    marginVertical: 20,
+    height: 100,
+    overflow: 'hidden',
   },
   banner: {
     flexDirection: 'column',
   },
   bannerItem: {
-    height: 100, // Same height as bannerContainer
-    justifyContent: 'center',
+    padding: 20,
     alignItems: 'center',
-    backgroundColor: '#ffcc00', // Background color for the banner
-    marginBottom: 10, // Space between ads
-    borderRadius: 10,
   },
   bannerText: {
+    color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
-    color: 'black',
+    textAlign: 'center',
   },
   dateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 25,
     justifyContent: 'center',
-    width: '90%',
-    padding: 10,
-    marginTop: 20,
-    marginLeft: 20,
-    elevation: 3,
-    backgroundColor: '#f0f0f0', // Change background color if needed
-  },
-  calendarIconContainer: {
-    marginRight: 10,
+    paddingVertical: 10,
   },
   dateText: {
-    fontSize: 17,
-    fontWeight: 'bold',
+    fontSize: 18,
+    marginLeft: 10,
   },
   sectionTitle: {
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginLeft: 20,
+    marginTop: 20,
   },
   separator: {
-    borderBottomColor: 'gray',
-    borderBottomWidth: 0.5,
-    width: '90%',
-    alignSelf: 'center',
-    marginTop: 5,
+    height: 50,
+  },
+  categoryTitle: {
+    fontSize: 30,
+    color: '#fff',
+    textAlign: 'center',
+    padding: 15,
   },
 });
 
-export default Home;
+export default App;

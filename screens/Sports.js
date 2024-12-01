@@ -20,7 +20,7 @@ const Sports = ({ navigation }) => {
     } */
 
     function getNewsFromAPI() {
-        newAPI.get('top-headlines?country=us&category=sports&apiKey=920deb9f754348c0bec4871fef36d971')
+        newAPI.get('top-headlines?country=us&category=sports&apiKey=1447d07f95c24384a8f4f010a21d5574')
         .then(async function(response){
             setNewsTech(response.data)
         })
