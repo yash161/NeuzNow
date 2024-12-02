@@ -8,13 +8,15 @@ import Home from "./screens/Home";
 import AdminDashboard from "./screens/Admin";
 import RegisterScreen from "./screens/RegisterScreen"
 import ResetPasswordScreen from "./screens/ResetPasswordScreen";
+import StudentVerificationPage from "./screens/studentVerification";
+import AuthorsPage from "./screens/AuthorPage";
 // Create a Stack Navigator
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="LoginScreen">
+      <Stack.Navigator initialRouteName="AuthorsPage">
         {/* LoginScreen */}
         <Stack.Screen 
           name="LoginScreen" 
@@ -62,6 +64,16 @@ const App = () => {
           <Stack.Screen 
           name="ResetPasswordScreen" 
           component={ResetPasswordScreen} 
+          options={{ headerShown: false }} 
+        />
+          <Stack.Screen 
+          name="StudentVerificationPage" 
+          component={StudentVerificationPage} 
+          options={{ headerShown: false }} 
+        />
+         <Stack.Screen 
+          name="AuthorsPage" 
+          component={AuthorsPage} 
           options={{ headerShown: false }} 
         />
       </Stack.Navigator>
