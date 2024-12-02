@@ -7,13 +7,18 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const cheerio = require('cheerio');
 const axios = require('axios');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));  // Add this line
 
+// Middleware to parse JSON bodies (for API requests)
+app.use(express.json());  
 // Create MySQL connection
 const db = mysql.createConnection({
-  host: '44.211.121.103',
+  host: '3.236.180.132',
   user: 'root',
   password: 'neuz@123',
   database: 'auth_db',
@@ -44,19 +49,36 @@ async function generateSummary(text) {
     }
 }
 // Login API endpoint
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  const sql = 'SELECT * FROM users WHERE email = ? AND password = ?';
-  db.query(sql, [email, password], (err, results) => {
-    if (err) {
-      res.status(500).json({ message: 'An error occurred during login.' });
-    } else if (results.length > 0) {
+  // Validate inputs
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Please enter both email and password.' });
+  }
+
+  try {
+    // Retrieve the user from the database
+    const [user] = await db.promise().query(
+      'SELECT * FROM User_details WHERE email = ?',
+      [email]
+    );
+
+    if (user.length === 0) {
+      return res.status(401).json({ message: 'Invalid email or password.' });
+    }
+    // Compare the provided password with the hashed password
+    const passwordMatch = await bcrypt.compare(password, user[0].password);
+
+    if (passwordMatch) {
       res.status(200).json({ message: 'Login successful' });
     } else {
-      res.status(401).json({ message: 'Invalid email or password' });
+      res.status(401).json({ message: 'Invalid email or password.' });
     }
-  });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
 });
 
 app.post('/register', async (req, res) => {
@@ -169,7 +191,152 @@ app.get('/proxy', async (req, res) => {
   }
 });
 
+app.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
 
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required.' });
+  }
+
+  try {
+    // Check if email exists
+    const [user] = await db.promise().query('SELECT * FROM User_details WHERE email = ?', [email]);
+    if (user.length === 0) {
+      return res.status(404).json({ message: 'Email not registered.' });
+    }
+
+    // Generate reset token and expiry (1 hour from now)
+    const token = crypto.randomBytes(20).toString('hex');
+    const tokenExpiry = new Date(Date.now() + 3600000).toISOString().slice(0, 19).replace('T', ' '); // MySQL DATETIME format
+
+    // Save token and expiry to the database
+    await db.promise().query(
+      'UPDATE User_details SET resetToken = ?, resetTokenExpiry = ? WHERE email = ?',
+      [token, tokenExpiry, email]
+    );
+
+    // Send reset email
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'testwowtruecaller123', 
+        pass: 'vpjbpiivyzziwgkd',   
+      },
+    });
+
+    const resetUrl = `http://localhost:3000/reset-password?token=${token}`;
+    const mailOptions = {
+      to: email,
+      user: 'testwowtruecaller123', 
+      pass: 'vpjbpiivyzziwgkd',
+      text: `You requested a password reset.\n\nClick the link below or paste this into your browser:\n\n${resetUrl}`
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'Reset link sent to your email.' });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// Route: Verify Token and Show Reset Form (Simulated)
+app.get('/reset-password', async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({ message: 'Token is required.' });
+  }
+
+  try {
+    const [user] = await db.promise().query('SELECT * FROM User_details WHERE resetToken = ?', [token]);
+
+    if (user.length === 0) {
+      return res.status(404).json({ message: 'Invalid or expired token.' });
+    }
+
+    const tokenExpiry = new Date(user[0].resetTokenExpiry);
+    if (new Date() > tokenExpiry) {
+      return res.status(400).json({ message: 'Token has expired.' });
+    }
+
+    // Render a simple form (For production, replace this with a frontend page)
+    res.status(200).send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head><meta charset="UTF-8"><title>Reset Password</title></head>
+      <body>
+        <h2>Reset Password</h2>
+        <form action="/update-password" method="POST">
+          <input type="hidden" name="token" value="${token}" />
+          <label>New Password:</label><br />
+          <input type="password" name="newPassword" required /><br /><br />
+          <button type="submit">Reset Password</button>
+        </form>
+      </body>
+      </html>
+    `);
+  } catch (error) {
+    console.error('Error during token verification:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+// Route: Update Password
+app.post('/update-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required.' });
+  }
+
+  try {
+    // Retrieve the user with the provided reset token
+    const [user] = await db.promise().query('SELECT * FROM User_details WHERE resetToken = ?', [token]);
+
+    if (user.length === 0) {
+      return res.status(404).json({ message: 'Invalid token.' });
+    }
+
+    // Check if the token has expired
+    const tokenExpiry = new Date(user[0].resetTokenExpiry);
+    if (new Date() > tokenExpiry) {
+      return res.status(400).json({ message: 'Token has expired.' });
+    }
+
+    // Hash the new password before storing it
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the password and clear the reset token fields
+    await db.promise().query(
+      'UPDATE User_details SET password = ?, resetToken = NULL, resetTokenExpiry = NULL WHERE resetToken = ?',
+      [hashedPassword, token]
+    );
+
+    // Send a confirmation email after successful password reset
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'testwowtruecaller123', 
+        pass: 'vpjbpiivyzziwgkd',           // Replace with your email app password
+      },
+    });
+
+    const mailOptions = {
+      to: user[0].email,                     // Send to the user's registered email
+      from: 'NeuzNow@gmail.com',          // Replace with your email
+      subject: 'Password Reset Confirmation for NeuzNow',
+      text: `Hello,\n\nThis is a confirmation that your password for the account ${user[0].email} has been successfully reset.\n\nIf you did not request this change, please contact support immediately.`,
+    };
+
+    await transporter.sendMail(mailOptions); // Send the email
+
+    res.status(200).json({ message: 'Password successfully reset and confirmation email sent.' });
+  } catch (error) {
+    console.error('Error during password reset:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
 // Start the server
 const PORT = 3000;
 app.listen(PORT, () => {
