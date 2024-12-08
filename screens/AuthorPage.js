@@ -10,9 +10,6 @@ const categories = [
   { label: "Health", value: "Health" },
   { label: "Sports", value: "Sports" },
   { label: "Business", value: "Business" },
-  { label: "Entertainment", value: "Entertainment" },
-  { label: "Politics", value: "Politics" },
-  { label: "Science", value: "Science" },
 ];
 
 const AuthorsPage = () => {
