@@ -64,6 +64,7 @@ export default function RegisterScreen({ navigation }) {
             routes: [{ name: 'Dashboard' }],
           });
         }
+        
       }
     } catch (error) {
       if (error.response && error.response.data) {

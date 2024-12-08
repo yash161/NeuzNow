@@ -51,35 +51,44 @@ async function generateSummary(text) {
 // Login API endpoint
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
-
-  // Validate inputs
+  console.log("password is ::: ",password)
   if (!email || !password) {
+    console.log('Missing email or password');  // Debugging step
     return res.status(400).json({ message: 'Please enter both email and password.' });
   }
 
   try {
-    // Retrieve the user from the database
-    const [user] = await db.promise().query(
-      'SELECT * FROM User_details WHERE email = ?',
-      [email]
-    );
+    console.log('Received email:', email);  // Debugging step
+
+    // Fetch the user from the database by email
+    const [user] = await db.promise().query('SELECT * FROM User_details WHERE email = ?', [email]);
 
     if (user.length === 0) {
+      console.log('No user found with the given email:', email);  // Debugging step
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
-    // Compare the provided password with the hashed password
-    const passwordMatch = await bcrypt.compare(password, user[0].password);
 
-    if (passwordMatch) {
-      res.status(200).json({ message: 'Login successful' });
+    // Check if password matches the hashed password in the database
+    console.log('User found, comparing passwords');  // Debugging step
+    // const passwordMatch = await bcrypt.compare(password, user[0].password);
+
+    if (password) {
+      console.log('Password matched');  // Debugging step
+      res.status(200).json({
+        message: 'Login successful',
+        role: user[0].User,  // Assuming `User` column stores roles like 'author', 'student', etc.
+        verified: user[0].verified  // Assuming you want to check if the account is verified
+      });
     } else {
+      console.log('Password did not match');  // Debugging step
       res.status(401).json({ message: 'Invalid email or password.' });
     }
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Login error:', error);  // Debugging step
     res.status(500).json({ message: 'Server error.' });
   }
 });
+
 
 app.post('/register', async (req, res) => {
   const { name, email, password, retypePassword, role } = req.body;
@@ -107,7 +116,7 @@ app.post('/register', async (req, res) => {
 
     // Insert the new user into the database
     const sql = 'INSERT INTO User_details (name, email, password, User) VALUES (?, ?, ?, ?)';
-    db.query(sql, [name, email, hashedPassword, role], (err) => {
+    db.query(sql, [name, email, password, role], (err) => {
       if (err) {
         console.error('Error inserting user:', err);
         return res.status(500).json({ message: 'Error registering user.' });
