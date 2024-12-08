@@ -12,7 +12,7 @@ import StudentVerificationPage from "./screens/studentVerification";
 import AuthorsPage from "./screens/AuthorPage";
 import ProfileScreen from "./screens/ProfileScreen";
 import AddBlog from './screens/AddBlog';
-
+import ManageAuthors from "./screens/Authormanagment";
 // Create a Stack Navigator
 const Stack = createStackNavigator();
 
@@ -68,6 +68,12 @@ const App = () => {
         <Stack.Screen 
           name="DrawerNavigator" 
           component={DrawerNavigator} 
+          options={{ headerShown: false }} 
+        />
+         {/* Drawer Navigator */}
+         <Stack.Screen 
+          name="ManageAuthors" 
+          component={ManageAuthors} 
           options={{ headerShown: false }} 
         />
 

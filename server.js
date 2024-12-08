@@ -11,7 +11,13 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const app = express();
 app.use(bodyParser.json());
-app.use(cors());
+const corsOptions = {
+  origin: '*', // Update this to restrict specific origins if needed
+  methods: ['GET', 'POST', 'DELETE', 'PUT', 'OPTIONS'], // Allow required methods
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.urlencoded({ extended: true }));  // Add this line
 
 // Middleware to parse JSON bodies (for API requests)
@@ -23,7 +29,13 @@ const db = mysql.createConnection({
   password: 'neuz@123',
   database: 'auth_db',
 });
-
+const transporter = nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: 'testwowtruecaller123', 
+    pass: 'vpjbpiivyzziwgkd',           // Replace with your email app password
+  },
+});
 // Connect to MySQL
 db.connect((err) => {
   if (err) {
@@ -88,6 +100,97 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 });
+app.get('/authors', async (req, res) => {
+  try {
+    // Querying the 'User_details' table to get authors where the User role is 'Author'
+    const [authors] = await db.promise().query('SELECT name, email, verified FROM User_details WHERE User = "Author"');
+    res.status(200).json(authors); // Respond with authors' data
+  } catch (error) {
+    console.error('Error fetching authors:', error);
+    res.status(500).json({ message: 'Server error.' }); // Handle errors
+  }
+});
+// Endpoint to delete an author
+
+app.delete('/delete-author/:email', async (req, res) => {
+  const { email } = req.params;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required to delete an author.' });
+  }
+
+  try {
+    const [result] = await db.promise().query(
+      'DELETE FROM User_details WHERE email = ? AND User = "Author"',
+      [email]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Author not found or already deleted.' });
+    }
+
+    // Send deletion email
+    const mailOptions = {
+      to: email,
+      subject: 'Your Account Has Been Deleted',
+      text: `Hello,
+
+Your account has been deleted from our platform. If this was a mistake or you have any questions, please contact our support team.
+
+Best regards,
+NeuzNow`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'Author deleted successfully and email sent.' });
+
+  } catch (error) {
+    console.error('Error deleting author:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+
+// Endpoint to verify an author
+app.post('/verify-author', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required.' });
+  }
+
+  try {
+    // Update the 'verified' status of the author
+    const [result] = await db.promise().query(
+      'UPDATE User_details SET verified = ? WHERE email = ? AND User = "Author"',
+      ['verified', email]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Author not found.' });
+    }
+
+    // Send verification email
+    const mailOptions = {
+      to: email,
+      subject: 'Your Account Has Been Verified',
+      text: `Hello ,
+
+Your account has been successfully verified. You can now access all the features of our platform.
+
+Best regards,
+NeuzNow`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'Author verified successfully and email sent.' });
+
+  } catch (error) {
+    console.error('Error verifying author:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
 
 
 app.post('/register', async (req, res) => {
@@ -323,13 +426,7 @@ app.post('/update-password', async (req, res) => {
     );
 
     // Send a confirmation email after successful password reset
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: 'testwowtruecaller123', 
-        pass: 'vpjbpiivyzziwgkd',           // Replace with your email app password
-      },
-    });
+  
 
     const mailOptions = {
       to: user[0].email,                     // Send to the user's registered email

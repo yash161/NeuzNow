@@ -14,11 +14,40 @@ import themeContext from '../config/themeContext';
 
 const Tab = createBottomTabNavigator();
 
+const UserMenu = ({ userName, navigation, onLogout }) => {
+  const [isMenuVisible, setMenuVisible] = useState(false);
+
+  return (
+    <View style={styles.userMenuContainer}>
+      <TouchableOpacity onPress={() => setMenuVisible(!isMenuVisible)}>
+        <Text style={styles.userName}>{userName}</Text>
+      </TouchableOpacity>
+      {isMenuVisible && (
+        <View style={styles.userMenuDropdown}>
+          <TouchableOpacity onPress={() => {
+            setMenuVisible(false);
+            navigation.navigate('Profile');
+          }}>
+            <Text style={styles.userMenuItem}>View Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => {
+            setMenuVisible(false);
+            onLogout();
+          }}>
+            <Text style={styles.userMenuItem}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+};
+
 const HomeScreen = () => {
   const [isLoading, setLoading] = useState(true);
   const [news, setNews] = useState([]);
   const [showCalendar, setShowCalendar] = useState(false);
   const [isSidebarVisible, setSidebarVisible] = useState(false);
+  const [userName, setUserName] = useState('John Doe');
   const navigation = useNavigation();
   const theme = useContext(themeContext);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
@@ -83,6 +112,15 @@ const HomeScreen = () => {
       <TouchableOpacity style={styles.topLeftButton} onPress={toggleSidebar}>
         <Icon name="bars" size={24} color="#FFFFFF" />
       </TouchableOpacity>
+
+      <UserMenu 
+        userName={userName}
+        navigation={navigation}
+        onLogout={() => {
+          alert('Logged out successfully');
+          navigation.replace('LoginScreen');
+        }}
+      />
 
       <Animated.View style={[styles.sidebar, { transform: [{ translateX: sidebarAnim }] }]}>
         <View style={styles.sidebarHeader}>
@@ -335,6 +373,35 @@ const styles = StyleSheet.create({
   },
   sidebarText: {
     fontSize: 18,
+    color: '#000',
+  },
+  userMenuContainer: {
+    position: 'absolute',
+    right: 15,
+    top: 10,
+    zIndex: 10,
+  },
+  userName: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  userMenuDropdown: {
+    position: 'absolute',
+    top: 30,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 5,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  userMenuItem: {
+    fontSize: 16,
+    paddingVertical: 5,
     color: '#000',
   },
 });
