@@ -58,7 +58,7 @@ export default function LoginScreen({ navigation }) {
             navigation.replace('AdminDashboard');
             break;
           default:
-            navigation.replace('DrawerNavigator'); // Replace with your default page
+            navigation.replace('Home'); // Replace with your default page
         }
       } else {
         Alert.alert('Login Error', jsonResponse.message || 'Invalid credentials.');
