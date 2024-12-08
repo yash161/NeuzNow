@@ -54,7 +54,8 @@ export default function RegisterScreen({ navigation }) {
         console.log(`Role is ${role}. Proceeding with redirection...`);
         
         const roleLower = role.toLowerCase(); // Convert role to lowercase for case-insensitive comparison
-        
+
+
         if (roleLower === 'admin') {
           console.log("Redirected to admin panel");
           navigation.reset({
@@ -67,6 +68,12 @@ export default function RegisterScreen({ navigation }) {
             index: 0,
             routes: [{ name: 'AuthorsPage' }], // Redirect to Author Page if role is Author
           });
+        } else if (roleLower === 'student') {
+          console.log("Redirected to student page");
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'StudentVerificationPage' }], // Redirect to Student Dashboard if role is Student
+          });
         } else {
           console.log("Redirected to user dashboard");
           navigation.reset({
@@ -74,6 +81,7 @@ export default function RegisterScreen({ navigation }) {
             routes: [{ name: 'Home' }], // Default redirect for other roles (User, Student)
           });
         }
+        
         
       }
     } catch (error) {
@@ -137,7 +145,7 @@ export default function RegisterScreen({ navigation }) {
         <Picker.Item label="User" value="User" />
         <Picker.Item label="Author" value="Author" />
         <Picker.Item label="Student" value="Student" />
-        <Picker.Item label="Admin" value="Admin" /> {/* Added Admin role */}
+ 
       </Picker>
       <Button
         mode="contained"
