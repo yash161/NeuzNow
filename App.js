@@ -10,6 +10,8 @@ import RegisterScreen from "./screens/RegisterScreen";
 import ResetPasswordScreen from "./screens/ResetPasswordScreen";
 import StudentVerificationPage from "./screens/studentVerification";
 import AuthorsPage from "./screens/AuthorPage";
+import ProfileScreen from "./screens/ProfileScreen";
+import AddBlog from './screens/AddBlog';
 import ManageAuthors from "./screens/Authormanagment";
 // Create a Stack Navigator
 const Stack = createStackNavigator();
@@ -25,6 +27,7 @@ const App = () => {
           component={LoginScreen} 
           options={{ headerShown: false }} 
         />
+        <Stack.Screen name="AddBlog" component={AddBlog} options={{ headerShown: false }} />
 
         {/* Register Screen */}
         <Stack.Screen 
@@ -51,6 +54,13 @@ const App = () => {
         <Stack.Screen 
           name="AdminDashboard" 
           component={AdminDashboard} 
+          options={{ headerShown: false }} 
+        />
+        
+        {/* Student Dashboard */}
+        <Stack.Screen 
+          name="ProfileScreen" 
+          component={ProfileScreen} 
           options={{ headerShown: false }} 
         />
 
