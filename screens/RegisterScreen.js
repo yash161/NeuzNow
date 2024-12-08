@@ -56,7 +56,7 @@ export default function RegisterScreen({ navigation }) {
         } else if (role === 'Author') {
           navigation.reset({
             index: 0,
-            routes: [{ name: 'AuthorPage' }],
+            routes: [{ name: 'AuthorsPage' }],
           });
         } else {
           navigation.reset({
