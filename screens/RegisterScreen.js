@@ -53,25 +53,28 @@ export default function RegisterScreen({ navigation }) {
         // Log and ensure that the role-based redirect is being reached
         console.log(`Role is ${role}. Proceeding with redirection...`);
         
-        if (role === 'Admin') {
+        const roleLower = role.toLowerCase(); // Convert role to lowercase for case-insensitive comparison
+        
+        if (roleLower === 'admin') {
           console.log("Redirected to admin panel");
           navigation.reset({
             index: 0,
             routes: [{ name: 'AdminDashboard' }], // Redirect to Admin Page if role is Admin
           });
-        } else if (role === 'Author') {
+        } else if (roleLower === 'author') {
           console.log("Redirected to author page");
           navigation.reset({
             index: 0,
-            routes: [{ name: 'AuthorPage' }], // Redirect to Author Page if role is Author
+            routes: [{ name: 'AuthorsPage' }], // Redirect to Author Page if role is Author
           });
         } else {
           console.log("Redirected to user dashboard");
           navigation.reset({
             index: 0,
-            routes: [{ name: 'Dashboard' }], // Default redirect for other roles (User, Student)
+            routes: [{ name: 'DrawerNavigator' }], // Default redirect for other roles (User, Student)
           });
         }
+        
       }
     } catch (error) {
       // Display error message from the backend

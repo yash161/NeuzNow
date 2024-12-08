@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, StyleSheet, View, Alert } from 'react-native';
 import { Text } from 'react-native-paper';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
@@ -10,6 +10,7 @@ import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import { emailValidator } from '../helpers/emailValidator';
 import { passwordValidator } from '../helpers/passwordValidator';
+import StudentVerificationPage from './studentVerification';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState({ value: '', error: '' });
@@ -18,14 +19,14 @@ export default function LoginScreen({ navigation }) {
   const onLoginPressed = async () => {
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
+
     if (emailError || passwordError) {
       setEmail({ ...email, error: emailError });
       setPassword({ ...password, error: passwordError });
       return;
     }
-  
+
     try {
-      // Make a POST request to the backend
       const response = await fetch('http://127.0.0.1:3000/login', {
         method: 'POST',
         headers: {
@@ -36,24 +37,37 @@ export default function LoginScreen({ navigation }) {
           password: password.value,
         }),
       });
-  
+
       const jsonResponse = await response.json();
-  
+
       if (response.ok) {
-        // Login was successful, navigate to the DrawerNavigator
-        navigation.replace('Home');
+        // Check the role from the response and navigate accordingly
+        const { role } = jsonResponse;
+        console.log("Role is ::", role);
+        switch (true) {  // Using true as a condition to compare multiple values
+          case /author/i.test(role):  // Case-insensitive match for 'author'
+            navigation.replace('AuthorsPage');
+            break;
+          case /author-wait/i.test(role):  // Case-insensitive match for 'author-wait'
+            navigation.replace('AuthorWaitPage');
+            break;
+          case /student/i.test(role):  // Case-insensitive match for 'student'
+            navigation.replace('StudentVerificationPage');
+            break;
+          case /admin/i.test(role):  // Case-insensitive match for 'admin'
+            navigation.replace('AdminDashboard');
+            break;
+          default:
+            navigation.replace('DrawerNavigator'); // Replace with your default page
+        }
       } else {
-        // Show error message
-        setEmail({ ...email, error: jsonResponse.message });
-        setPassword({ ...password, error: jsonResponse.message });
+        Alert.alert('Login Error', jsonResponse.message || 'Invalid credentials.');
       }
     } catch (error) {
       console.error('Error during login:', error);
-      setEmail({ ...email, error: 'Something went wrong. Please try again.' });
-      setPassword({ ...password, error: 'Something went wrong. Please try again.' });
+      Alert.alert('Login Error', 'Something went wrong. Please try again.');
     }
   };
-  
 
   return (
     <Background>
@@ -118,3 +132,4 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
   },
 });
+  
