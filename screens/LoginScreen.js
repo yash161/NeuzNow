@@ -6,7 +6,6 @@ import Logo from '../components/Logo';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import TextInput from '../components/TextInput';
-import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import { emailValidator } from '../helpers/emailValidator';
 import { passwordValidator } from '../helpers/passwordValidator';
@@ -23,7 +22,7 @@ export default function LoginScreen({ navigation }) {
       setPassword({ ...password, error: passwordError });
       return;
     }
-  
+
     try {
       // Make a POST request to the backend
       const response = await fetch('http://127.0.0.1:3000/login', {
@@ -36,9 +35,9 @@ export default function LoginScreen({ navigation }) {
           password: password.value,
         }),
       });
-  
+
       const jsonResponse = await response.json();
-  
+
       if (response.ok) {
         // Login was successful, navigate to the DrawerNavigator
         navigation.replace('Home');
@@ -53,11 +52,9 @@ export default function LoginScreen({ navigation }) {
       setPassword({ ...password, error: 'Something went wrong. Please try again.' });
     }
   };
-  
 
   return (
     <Background>
-      <BackButton goBack={navigation.goBack} />
       <Logo />
       <Header>Welcome back.</Header>
       <TextInput
