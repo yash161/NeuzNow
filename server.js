@@ -6,9 +6,15 @@ const fetch = require('node-fetch');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const cheerio = require('cheerio');
 const axios = require('axios');
+const multer = require('multer');
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const AWS = require('aws-sdk');
+const multerS3 = require('multer-s3');
+const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
 const app = express();
 app.use(bodyParser.json());
 const corsOptions = {
@@ -24,7 +30,7 @@ app.use(express.urlencoded({ extended: true }));  // Add this line
 app.use(express.json());  
 // Create MySQL connection
 const db = mysql.createConnection({
-  host: '44.203.30.209',
+  host: '100.26.148.160',
   user: 'root',
   password: 'neuz@123',
   database: 'auth_db',
@@ -208,7 +214,7 @@ app.post('/register', async (req, res) => {
   try {
     // Check if the user already exists
     const [existingUser] = await db.promise().query(
-      'SELECT * FROM users WHERE email = ?',
+      'SELECT * FROM User_details WHERE email = ?',
       [email]
     );
     if (existingUser.length > 0) {
@@ -444,6 +450,83 @@ app.post('/update-password', async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 });
+
+// AWS.config.update({
+//   accessKeyId: 'AKIA6ODU4CE4FHYXHVEP',  // Replace with your AWS access key
+//   secretAccessKey: 'pssK78lAIy9crLriYZz+y56Tfx44IzPZcV12L+zK',  // Replace with your AWS secret key
+//   region: 'us-east-1',  // Replace with your region (e.g., 'us-east-1')
+// });
+
+// const s3 = new AWS.S3();
+
+// // Create multer upload configuration to store files in S3
+// const upload = multer({
+//   storage: multerS3({
+//     s3: s3,
+//     bucket: 'neuznowbucket', // Replace with your S3 bucket name
+//     acl: 'public-read',  // Ensures the uploaded files are publicly accessible
+//     metadata: function (req, file, cb) {
+//       cb(null, { fieldName: file.fieldname });
+//     },
+//     key: function (req, file, cb) {
+//       const fileName = `${uuidv4()}-${Date.now()}${path.extname(file.originalname)}`;
+//       cb(null, fileName);  // Generate a unique filename for each upload
+//     }
+//   })
+// });
+
+
+// // Endpoint to handle student verification form submission
+// app.post(
+//   '/verifyStudent',
+//   upload.fields([
+//     { name: 'frontPhoto', maxCount: 1 },
+//     { name: 'backPhoto', maxCount: 1 },
+//   ]),
+//   (req, res) => {
+//     console.log('Files Uploaded:', req.files);  // Ensure files are processed
+//     console.log('Request Body:', req.body);
+
+//     const { studentName, studentUniversity, enrollmentNumber } = req.body;
+
+//     // Extract the S3 URLs from the uploaded files
+//     const frontPhotoURL = req.files['frontPhoto'] ? req.files['frontPhoto'][0].location : null;
+//     const backPhotoURL = req.files['backPhoto'] ? req.files['backPhoto'][0].location : null;
+
+//     if (!studentName || !studentUniversity || !enrollmentNumber || !frontPhotoURL || !backPhotoURL) {
+//       console.error('Validation Error: Missing fields or files');
+//       return res.status(400).json({ message: 'Please fill out all fields and upload both ID card photos.' });
+//     }
+
+//     // Insert data into the database
+//     const query =
+//       'INSERT INTO students (student_name, student_university, enrollment_number, front_photo_path, back_photo_path) VALUES (?, ?, ?, ?, ?)';
+//     db.query(
+//       query,
+//       [studentName, studentUniversity, enrollmentNumber, frontPhotoURL, backPhotoURL],
+//       (err, result) => {
+//         if (err) {
+//           console.error('Database Error:', err);
+//           return res.status(500).json({ message: 'Error saving data to the database.' });
+//         }
+
+//         console.log('Database Insert Success:', result);
+//         res.status(200).json({
+//           message: 'Student verification has been successfully submitted.',
+//           studentName,
+//           studentUniversity,
+//           enrollmentNumber,
+//           frontPhotoURL,
+//           backPhotoURL,
+//         });
+//       }
+//     );
+//   }
+// );
+
+
+
+
 // Start the server
 const PORT = 3000;
 app.listen(PORT, () => {
