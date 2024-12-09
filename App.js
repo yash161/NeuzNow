@@ -13,18 +13,21 @@ import AuthorsPage from "./screens/AuthorPage";
 import ProfileScreen from "./screens/ProfileScreen";
 import AddBlog from './screens/AddBlog';
 import ManageAuthors from "./screens/Authormanagment";
+import AuthorProfile from "./screens/AuthorProfile";
+import StudentProfile from "./screens/StudentProfile";
+import UserProfile from "./screens/UserProfile";
 // Create a Stack Navigator
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="LoginScreen">
+      <Stack.Navigator initialRouteName="UserProfile">
         {/* LoginScreen */}
         <Stack.Screen 
         
-          name="LoginScreen" 
-          component={LoginScreen} 
+          name="UserProfile" 
+          component={UserProfile} 
           options={{ headerShown: false }} 
         />
         <Stack.Screen name="AddBlog" component={AddBlog} options={{ headerShown: false }} />
