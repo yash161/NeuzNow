@@ -15,7 +15,7 @@ const Health = ({ navigation }) => {
     }, [])
 
     /* const newsResponse = async() => {
-        const response = await newAPI.get('everything?q=tesla&from=2021-07-19&sortBy=publishedAt&1447d07f95c24384a8f4f010a21d5574=920deb9f754348c0bec4871fef36d971')
+        const response = await newAPI.get('everything?q=tesla&from=2021-07-19&sortBy=publishedAt&1447d07f95c24384a8f4f010a21d5574=126f7f4b15e5441aa59dfe9edbf6a08a')
         console.log(response.data)
     } */
 

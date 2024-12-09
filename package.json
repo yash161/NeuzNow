@@ -10,7 +10,9 @@
   "dependencies": {
     "@expo/vector-icons": "^12.0.5",
     "@google/generative-ai": "^0.21.0",
+    "@react-native-async-storage/async-storage": "^2.1.0",
     "@react-native-community/masked-view": "^0.1.11",
+    "@react-native-picker/picker": "^2.10.2",
     "@react-navigation/bottom-tabs": "^6.0.9",
     "@react-navigation/drawer": "^6.1.8",
     "@react-navigation/native": "^6.1.18",
@@ -48,6 +50,7 @@
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "0.17.1",
     "react-native-webview": "^11.14.2",
+    "universal-cookie": "^7.2.2",
     "yarn": "^1.22.22"
   },
   "devDependencies": {

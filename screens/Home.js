@@ -11,7 +11,7 @@ import newAPI from '../apis/News';
 import Card from '../components/Card';
 import YourCalendarComponent from '../components/YourCalendarComponent';
 import themeContext from '../config/themeContext';
-
+import { UserContext } from './UserContext';
 const Tab = createBottomTabNavigator();
 
 const UserMenu = ({ userName, navigation, onLogout }) => {
@@ -47,7 +47,9 @@ const HomeScreen = () => {
   const [news, setNews] = useState([]);
   const [showCalendar, setShowCalendar] = useState(false);
   const [isSidebarVisible, setSidebarVisible] = useState(false);
-  const [userName, setUserName] = useState('John Doe');
+  const { user } = useContext(UserContext);
+  const [userName, setUserName] = useState(user?.user || 'Guest'); // Display user name from context or 'Guest'
+   console.log("Logged-in user:", userName);
   const navigation = useNavigation();
   const theme = useContext(themeContext);
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
@@ -207,7 +209,7 @@ const NewsScreen = ({ category }) => {
   }, []);
 
   const getNewsFromAPI = () => {
-    newAPI.get(`top-headlines?country=us&category=${category}&apiKey=920deb9f754348c0bec4871fef36d971`)
+    newAPI.get(`top-headlines?country=us&category=${category}&apiKey=126f7f4b15e5441aa59dfe9edbf6a08a`)
       .then((response) => {
         setNews(response.data.articles);
       })

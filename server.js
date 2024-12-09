@@ -88,6 +88,7 @@ app.post('/login', async (req, res) => {
       console.log('Password matched');  // Debugging step
       res.status(200).json({
         message: 'Login successful',
+        email:email,
         role: user[0].User,  // Assuming `User` column stores roles like 'author', 'student', etc.
         verified: user[0].verified  // Assuming you want to check if the account is verified
       });
