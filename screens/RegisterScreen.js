@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Picker, Alert } from 'react-native'; // Added Alert for response messages
+import { View, StyleSheet, TouchableOpacity, Picker, Alert } from 'react-native'; 
 import { Text } from 'react-native-paper';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
@@ -9,18 +9,16 @@ import TextInput from '../components/TextInput';
 import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import { emailValidator } from '../helpers/emailValidator';
-// import AdminDashboard from "./screens/Admin";
-import AdminDashboard from './Admin';
 import { passwordValidator } from '../helpers/passwordValidator';
 import { nameValidator } from '../helpers/nameValidator';
-import axios from 'axios'; // Import axios for API calls
+import axios from 'axios'; 
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState({ value: '', error: '' });
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
   const [retypePassword, setRetypePassword] = useState({ value: '', error: '' });
-  const [role, setRole] = useState('User'); // Default role
+  const [role, setRole] = useState('User'); 
 
   const onSignUpPressed = async () => {
     const nameError = nameValidator(name.value);
@@ -36,7 +34,6 @@ export default function RegisterScreen({ navigation }) {
       return;
     }
 
-    // Send data to the backend
     try {
       const response = await axios.post('http://127.0.0.1:3000/register', {
         name: name.value,
@@ -46,46 +43,34 @@ export default function RegisterScreen({ navigation }) {
         role: role,
       });
 
-      // Handle the response
       if (response.status === 201) {
         Alert.alert('Success', 'Registration successful!');
-  
-        // Log and ensure that the role-based redirect is being reached
-        console.log(`Role is ${role}. Proceeding with redirection...`);
         
-        const roleLower = role.toLowerCase(); // Convert role to lowercase for case-insensitive comparison
-
+        const roleLower = role.toLowerCase(); 
 
         if (roleLower === 'admin') {
-          console.log("Redirected to admin panel");
           navigation.reset({
             index: 0,
-            routes: [{ name: 'AdminDashboard' }], // Redirect to Admin Page if role is Admin
+            routes: [{ name: 'AdminDashboard' }],
           });
         } else if (roleLower === 'author') {
-          console.log("Redirected to author page");
           navigation.reset({
             index: 0,
-            routes: [{ name: 'AuthorsPage' }], // Redirect to Author Page if role is Author
+            routes: [{ name: 'AuthorsPage' }],
           });
         } else if (roleLower === 'student') {
-          console.log("Redirected to student page");
           navigation.reset({
             index: 0,
-            routes: [{ name: 'StudentVerificationPage' }], // Redirect to Student Dashboard if role is Student
+            routes: [{ name: 'StudentVerificationPage' }],
           });
         } else {
-          console.log("Redirected to user dashboard");
           navigation.reset({
             index: 0,
-            routes: [{ name: 'Home' }], // Default redirect for other roles (User, Student)
+            routes: [{ name: 'Home' }],
           });
         }
-        
-        
       }
     } catch (error) {
-      // Display error message from the backend
       if (error.response && error.response.data) {
         Alert.alert('Error', error.response.data.message);
       } else {
@@ -96,9 +81,12 @@ export default function RegisterScreen({ navigation }) {
 
   return (
     <Background>
-      <BackButton goBack={navigation.goBack} />
+      {/* Modify the BackButton to handle the back navigation */}
+      <BackButton goBack={() => navigation.replace('LoginScreen')} />
+      
       <Logo />
       <Header>Create Account</Header>
+      
       <TextInput
         label="Name"
         returnKeyType="next"
@@ -107,6 +95,7 @@ export default function RegisterScreen({ navigation }) {
         error={!!name.error}
         errorText={name.error}
       />
+      
       <TextInput
         label="Email"
         returnKeyType="next"
@@ -119,6 +108,7 @@ export default function RegisterScreen({ navigation }) {
         textContentType="emailAddress"
         keyboardType="email-address"
       />
+      
       <TextInput
         label="Password"
         returnKeyType="next"
@@ -128,6 +118,7 @@ export default function RegisterScreen({ navigation }) {
         errorText={password.error}
         secureTextEntry
       />
+      
       <TextInput
         label="Retype Password"
         returnKeyType="done"
@@ -137,6 +128,7 @@ export default function RegisterScreen({ navigation }) {
         errorText={retypePassword.error}
         secureTextEntry
       />
+      
       <Picker
         selectedValue={role}
         onValueChange={(itemValue) => setRole(itemValue)}
@@ -145,8 +137,8 @@ export default function RegisterScreen({ navigation }) {
         <Picker.Item label="User" value="User" />
         <Picker.Item label="Author" value="Author" />
         <Picker.Item label="Student" value="Student" />
- 
       </Picker>
+      
       <Button
         mode="contained"
         onPress={onSignUpPressed}
@@ -154,6 +146,7 @@ export default function RegisterScreen({ navigation }) {
       >
         Sign Up
       </Button>
+      
       <View style={styles.row}>
         <Text>Already have an account? </Text>
         <TouchableOpacity onPress={() => navigation.replace('LoginScreen')}>
