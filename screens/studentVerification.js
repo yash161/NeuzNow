@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView,
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-const StudentVerificationPage = () => {
+const StudentVerificationPage = ({ navigation }) => {  // Ensure navigation prop is passed
   const [studentName, setStudentName] = useState('');
   const [studentUniversity, setStudentUniversity] = useState('');
   const [enrollmentNumber, setEnrollmentNumber] = useState('');
@@ -44,99 +44,125 @@ const StudentVerificationPage = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.headerContainer}>
-        <Ionicons name="school-outline" size={40} color="#000" />
-        <Text style={styles.header}>Student Verification</Text>
-      </View>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        {/* Back Button */}
+        <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={30} color="#0056D2" />
+        </TouchableOpacity>
 
-      {/* Student Name */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Student Name <Text style={styles.required}>*</Text></Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter student name"
-          value={studentName}
-          onChangeText={setStudentName}
-          placeholderTextColor="#777"
-        />
-      </View>
+        <View style={styles.headerContainer}>
+          <Ionicons name="school-outline" size={40} color="#0056D2" />
+          <Text style={styles.header}>Student Verification</Text>
+        </View>
 
-      {/* Student University */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Student University <Text style={styles.required}>*</Text></Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter student university"
-          value={studentUniversity}
-          onChangeText={setStudentUniversity}
-          placeholderTextColor="#777"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>
+            Student Name <Text style={styles.required}>*</Text>
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter student name"
+            value={studentName}
+            onChangeText={setStudentName}
+            placeholderTextColor="#777"
+          />
+        </View>
 
-      {/* Enrollment Number */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Enrollment Number <Text style={styles.required}>*</Text></Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter enrollment number"
-          value={enrollmentNumber}
-          onChangeText={setEnrollmentNumber}
-          placeholderTextColor="#777"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>
+            Student University <Text style={styles.required}>*</Text>
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter student university"
+            value={studentUniversity}
+            onChangeText={setStudentUniversity}
+            placeholderTextColor="#777"
+          />
+        </View>
 
-      {/* ID Card Photos */}
-      <Text style={styles.sectionHeader}>Upload University ID Card</Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>
+            Enrollment Number <Text style={styles.required}>*</Text>
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter enrollment number"
+            value={enrollmentNumber}
+            onChangeText={setEnrollmentNumber}
+            placeholderTextColor="#777"
+          />
+        </View>
 
-      <View style={styles.photoContainer}>
-        <Text style={styles.label}>Front Photo <Text style={styles.required}>*</Text></Text>
-        {frontPhoto ? (
-          <View style={styles.photoWrapper}>
-            <Image source={{ uri: frontPhoto }} style={styles.photo} />
-            <TouchableOpacity onPress={() => setFrontPhoto(null)} style={styles.removePhotoButton}>
-              <Ionicons name="close-circle" size={24} color="#FF0000" />
+        <Text style={styles.sectionHeader}>Upload University ID Card</Text>
+
+        <View style={styles.photoContainer}>
+          <Text style={styles.label}>
+            Front Photo <Text style={styles.required}>*</Text>
+          </Text>
+          {frontPhoto ? (
+            <View style={styles.photoWrapper}>
+              <Image source={{ uri: frontPhoto }} style={styles.photo} />
+              <TouchableOpacity onPress={() => setFrontPhoto(null)} style={styles.removePhotoButton}>
+                <Ionicons name="close-circle" size={24} color="#FF0000" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.photoUploader} onPress={() => selectPhoto(setFrontPhoto)}>
+              <Ionicons name="camera-outline" size={50} color="#007BFF" />
+              <Text style={styles.uploadText}>Upload Front Photo</Text>
             </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity style={styles.photoUploader} onPress={() => selectPhoto(setFrontPhoto)}>
-            <Ionicons name="camera-outline" size={50} color="#007BFF" />
-            <Text style={styles.uploadText}>Upload Front Photo</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+          )}
+        </View>
 
-      <View style={styles.photoContainer}>
-        <Text style={styles.label}>Back Photo <Text style={styles.required}>*</Text></Text>
-        {backPhoto ? (
-          <View style={styles.photoWrapper}>
-            <Image source={{ uri: backPhoto }} style={styles.photo} />
-            <TouchableOpacity onPress={() => setBackPhoto(null)} style={styles.removePhotoButton}>
-              <Ionicons name="close-circle" size={24} color="#FF0000" />
+        <View style={styles.photoContainer}>
+          <Text style={styles.label}>
+            Back Photo <Text style={styles.required}>*</Text>
+          </Text>
+          {backPhoto ? (
+            <View style={styles.photoWrapper}>
+              <Image source={{ uri: backPhoto }} style={styles.photo} />
+              <TouchableOpacity onPress={() => setBackPhoto(null)} style={styles.removePhotoButton}>
+                <Ionicons name="close-circle" size={24} color="#FF0000" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.photoUploader} onPress={() => selectPhoto(setBackPhoto)}>
+              <Ionicons name="camera-outline" size={50} color="#007BFF" />
+              <Text style={styles.uploadText}>Upload Back Photo</Text>
             </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity style={styles.photoUploader} onPress={() => selectPhoto(setBackPhoto)}>
-            <Ionicons name="camera-outline" size={50} color="#007BFF" />
-            <Text style={styles.uploadText}>Upload Back Photo</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+          )}
+        </View>
 
-      {/* Verify Button */}
-      <TouchableOpacity style={styles.verifyButton} onPress={handleVerifyStudent}>
-        <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
-        <Text style={styles.verifyButtonText}>Verify Student</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.verifyButton} onPress={handleVerifyStudent}>
+          <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
+          <Text style={styles.verifyButtonText}>Verify Student</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
     flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E8F0F9',
     padding: 20,
-    backgroundColor: '#fff',
+  },
+  container: {
+    width: '100%',
+    maxWidth: 400,
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -145,22 +171,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   header: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
-    textAlign: 'center',
     marginLeft: 10,
-    color: '#000',
+    color: '#0056D2',
   },
   inputContainer: {
     marginBottom: 15,
   },
   input: {
     height: 50,
-    borderColor: '#000',
-    borderWidth: 2,
+    borderColor: '#DDDDDD',
+    borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 15,
-    backgroundColor: '#fff',
+    backgroundColor: '#F9FAFC',
     fontSize: 16,
     color: '#333',
   },
@@ -186,7 +211,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: 150,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#007BFF',
     borderRadius: 10,
     backgroundColor: '#F0F8FF',
@@ -214,16 +239,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#007313',
+    backgroundColor: '#28A745',
     padding: 15,
     borderRadius: 10,
-    marginTop: 20,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
   verifyButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
     marginLeft: 10,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 1,
   },
 });
 

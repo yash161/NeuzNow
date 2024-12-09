@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import RNPickerSelect from 'react-native-picker-select';
 
 const categories = [
-  { label: "Technology", value: "Technology" },
-  { label: "Health", value: "Health" },
-  { label: "Sports", value: "Sports" },
-  { label: "Business", value: "Business" },
+  { label: 'Technology', value: 'Technology' },
+  { label: 'Health', value: 'Health' },
+  { label: 'Sports', value: 'Sports' },
+  { label: 'Business', value: 'Business' },
 ];
 
 const AuthorsPage = () => {
@@ -20,6 +21,24 @@ const AuthorsPage = () => {
     { category: '', title: '', content: '', document: null, documentName: null },
     { category: '', title: '', content: '', document: null, documentName: null },
   ]);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    // Handle back button press
+    const backAction = () => {
+      // Reset the navigation stack to the Login page
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'LoginScreen' }],
+      });
+      return true; // Prevent the default back action
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    // Cleanup the listener on component unmount
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const handleNewsChange = (index, key, value) => {
     const updatedNews = [...newsEntries];
@@ -28,7 +47,7 @@ const AuthorsPage = () => {
   };
 
   const handlePublish = () => {
-    const namePattern = /^[A-Za-z]+$/;
+    const namePattern = /^[A-Za-z\s]+$/;
     const nameValid = namePattern.test(authorName);
     const allFieldsFilled = newsEntries.every(
       (entry) => entry.category && entry.title && entry.content
@@ -38,7 +57,7 @@ const AuthorsPage = () => {
     );
 
     if (!nameValid) {
-      Alert.alert('Validation Error', 'Author name can only contain letters.');
+      Alert.alert('Validation Error', 'Author name can only contain letters and spaces.');
       return;
     }
 
@@ -52,7 +71,7 @@ const AuthorsPage = () => {
       return;
     }
 
-    Alert.alert('News Published!', 'All three news articles have been successfully published.');
+    Alert.alert('News Published!', 'All news articles have been successfully published.');
     setAuthorName('');
     setAuthorPhoto(null);
     setNewsEntries([
@@ -81,10 +100,6 @@ const AuthorsPage = () => {
     }
   };
 
-  const removePhoto = () => {
-    setAuthorPhoto(null);
-  };
-
   const pickDocument = async (index) => {
     const result = await DocumentPicker.getDocumentAsync({
       type: '*/*',
@@ -93,46 +108,39 @@ const AuthorsPage = () => {
     if (result.type === 'success') {
       const updatedNews = [...newsEntries];
       updatedNews[index].document = result.uri;
-      updatedNews[index].documentName = result.name; // Update document name
+      updatedNews[index].documentName = result.name;
       setNewsEntries(updatedNews);
-    } else {
-      Alert.alert('No document selected', 'You need to select a document.');
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.headerContainer}>
-        <Ionicons name="newspaper-outline" size={40} color="#000" />
-        <Text style={styles.header}>Author Verification Page</Text>
-      </View>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Ionicons name="newspaper-outline" size={40} color="#0056D2" />
+          <Text style={styles.header}>Author Verification</Text>
+        </View>
 
-      <View style={styles.photoContainer}>
-        {authorPhoto ? (
-          <>
-            <TouchableOpacity onPress={removePhoto} style={styles.removePhotoButton}>
-              <Ionicons name="close-circle" size={24} color="#FF0000" />
-            </TouchableOpacity>
-            <View style={styles.photoBorder}>
-              <Image source={{ uri: authorPhoto }} style={styles.photo} />
-            </View>
-          </>
-        ) : (
-          <TouchableOpacity style={styles.photoBorder} onPress={selectPhoto}>
-            <Ionicons name="person-circle-outline" size={100} color="#007BFF" />
-          </TouchableOpacity>
-        )}
-      </View>
+        {/* Back Button */}
+        <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={30} color="#0056D2" />
+          <Text style={styles.backButtonText}>Back</Text>
+        </TouchableOpacity>
 
-      <Text style={[styles.label, { fontWeight: 'bold', fontSize: 20 }]}>
-        Publish 3 News to get Verified
-      </Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Author Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Author Name"
+            value={authorName}
+            onChangeText={setAuthorName}
+            placeholderTextColor="#777"
+          />
+        </View>
 
-      {newsEntries.map((news, index) => (
-        <View key={index} style={styles.newsContainer}>
-          <Text style={styles.newsHeader}>News {index + 1}</Text>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>News Category <Text style={styles.required}>*</Text></Text>
+        {newsEntries.map((news, index) => (
+          <View key={index} style={styles.inputContainer}>
+            <Text style={styles.label}>News {index + 1}</Text>
             <RNPickerSelect
               onValueChange={(value) => handleNewsChange(index, 'category', value)}
               items={categories}
@@ -140,10 +148,6 @@ const AuthorsPage = () => {
               placeholder={{ label: 'Select a category', value: null }}
               value={news.category}
             />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>News Title <Text style={styles.required}>*</Text></Text>
             <TextInput
               style={styles.input}
               placeholder="Enter news title"
@@ -151,75 +155,55 @@ const AuthorsPage = () => {
               onChangeText={(value) => handleNewsChange(index, 'title', value)}
               placeholderTextColor="#777"
             />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>News Content <Text style={styles.required}>*</Text></Text>
-            <View style={styles.textAreaContainer}>
-              <TouchableOpacity
-                style={styles.uploadDocumentButton}
-                onPress={() => pickDocument(index)}
-              >
-                <Ionicons name="link" size={24} color="#007BFF" />
-              </TouchableOpacity>
-              <Text style={styles.documentName}>
-                {news.documentName ? `Uploaded: ${news.documentName}` : 'No document uploaded.'}
+            <TextInput
+              style={styles.textArea}
+              placeholder="Enter news content"
+              value={news.content}
+              onChangeText={(value) => handleNewsChange(index, 'content', value)}
+              multiline
+              numberOfLines={4}
+              placeholderTextColor="#777"
+            />
+            <TouchableOpacity
+              style={styles.uploadButton}
+              onPress={() => pickDocument(index)}
+            >
+              <Ionicons name="document-outline" size={20} color="#007BFF" />
+              <Text style={styles.uploadButtonText}>
+                {news.documentName ? `Uploaded: ${news.documentName}` : 'Upload Document'}
               </Text>
-              <TextInput
-                style={styles.textArea}
-                value={news.content}
-                onChangeText={(value) => handleNewsChange(index, 'content', value)}
-                multiline={true}
-                numberOfLines={6}
-                placeholder="Enter news content"
-                placeholderTextColor="#777"
-              />
-            </View>
+            </TouchableOpacity>
           </View>
-        </View>
-      ))}
+        ))}
 
-      <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
-        <Ionicons name="send" size={20} color="#fff" />
-        <Text style={styles.publishButtonText}>Get Verified</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.verifyButton} onPress={handlePublish}>
+          <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
+          <Text style={styles.verifyButtonText}>Submit Verification</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
 
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    height: 50,
-    borderColor: '#000',
-    borderWidth: 2,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#fff',
-    fontSize: 16,
-    color: '#333',
-    marginTop: 5,
-  },
-  inputAndroid: {
-    height: 50,
-    borderColor: '#000',
-    borderWidth: 2,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#fff',
-    fontSize: 16,
-    color: '#333',
-    marginTop: 5,
-  },
-  placeholder: {
-    color: '#777',
-  },
-});
-
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
     flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E8F0F9',
     padding: 20,
-    backgroundColor: '#fff',
+  },
+  container: {
+    width: '100%',
+    maxWidth: 400,
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -228,108 +212,99 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   header: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
-    textAlign: 'center',
     marginLeft: 10,
-    color: '#000',
-  },
-  photoContainer: {
-    alignSelf: 'center',
-    marginBottom: 15,
-    position: 'relative',
-  },
-  photoBorder: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    borderColor: '#000',
-    borderWidth: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  photo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  removePhotoButton: {
-    position: 'absolute',
-    top: 24,
-    right: 5,
-    backgroundColor: 'transparent',
+    color: '#0056D2',
   },
   inputContainer: {
-    marginVertical: 10,
+    marginBottom: 15,
   },
   input: {
     height: 50,
-    borderColor: '#000',
-    borderWidth: 2,
+    borderColor: '#DDDDDD',
+    borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 15,
-    backgroundColor: '#fff',
+    backgroundColor: '#F9FAFC',
     fontSize: 16,
-    marginTop: 5,
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  required: {
-    color: '#FF0000',
-    fontSize: 16,
-  },
-  textAreaContainer: {
-    borderWidth: 2,
-    borderRadius: 10,
-    borderColor: '#000',
-    backgroundColor: '#fff',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginTop: 5,
+    color: '#333',
   },
   textArea: {
-    textAlignVertical: 'top',
-    fontSize: 16,
-    color: '#333',
-    height: 120,
-    marginTop: 5,
-  },
-  uploadDocumentButton: {
-    alignSelf: 'flex-start',
-  },
-  documentName: {
-    marginTop: 5,
-    fontSize: 16,
-    color: '#007BFF',
-  },
-  newsContainer: {
-    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
     borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    height: 100,
+    backgroundColor: '#F9FAFC',
+    textAlignVertical: 'top',
   },
-  newsHeader: {
-    fontSize: 20,
+  label: {
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
     color: '#333',
+    marginBottom: 5,
   },
-  publishButton: {
+  photoContainer: {
+    marginBottom: 15,
+  },
+  uploadButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 15,
+  },
+  uploadButtonText: {
+    marginLeft: 5,
+    color: '#007BFF',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  backButtonText: {
+    fontSize: 18,
+    color: '#0056D2',
+    marginLeft: 10,
+  },
+  verifyButton: {
+    flexDirection: 'row',
     justifyContent: 'center',
-    backgroundColor: '#15700b',
+    alignItems: 'center',
+    backgroundColor: '#28A745',
     padding: 15,
     borderRadius: 10,
+    marginTop: 10,
   },
-  publishButtonText: {
+  verifyButtonText: {
     fontSize: 18,
-    color: '#fff',
     fontWeight: 'bold',
-    marginLeft: 5,
+    color: '#fff',
+    marginLeft: 10,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    height: 50,
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    borderRadius: 10,
+    backgroundColor: '#F9FAFC',
+    fontSize: 16,
+    color: '#333',
+  },
+  inputAndroid: {
+    height: 50,
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    borderRadius: 10,
+    backgroundColor: '#F9FAFC',
+    fontSize: 16,
+    color: '#333',
   },
 });
 
