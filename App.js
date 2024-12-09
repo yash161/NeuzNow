@@ -12,6 +12,7 @@ import StudentVerificationPage from "./screens/studentVerification";
 import AuthorsPage from "./screens/AuthorPage";
 import ProfileScreen from "./screens/ProfileScreen";
 import AddBlog from './screens/AddBlog';
+import { UserProvider } from "./screens/UserContext";
 import ManageAuthors from "./screens/Authormanagment";
 import AuthorProfile from "./screens/AuthorProfile";
 import StudentProfile from "./screens/StudentProfile";
@@ -21,6 +22,7 @@ const Stack = createStackNavigator();
 
 const App = () => {
   return (
+    <UserProvider>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="UserProfile">
         {/* LoginScreen */}
@@ -102,6 +104,7 @@ const App = () => {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </UserProvider>
   );
 };
 

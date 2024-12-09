@@ -15,7 +15,7 @@ const Sports = ({ navigation }) => {
     }, [])
 
     /* const newsResponse = async() => {
-        const response = await newAPI.get('everything?q=tesla&from=2021-07-19&sortBy=publishedAt&apiKey=920deb9f754348c0bec4871fef36d971')
+        const response = await newAPI.get('everything?q=tesla&from=2021-07-19&sortBy=publishedAt&apiKey=126f7f4b15e5441aa59dfe9edbf6a08a')
         console.log(response.data)
     } */
 

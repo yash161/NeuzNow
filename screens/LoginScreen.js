@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; // Combine the imports
 import { TouchableOpacity, StyleSheet, View, Alert } from 'react-native';
 import { Text } from 'react-native-paper';
 import Background from '../components/Background';
@@ -9,9 +9,10 @@ import TextInput from '../components/TextInput';
 import { theme } from '../core/theme';
 import { emailValidator } from '../helpers/emailValidator';
 import { passwordValidator } from '../helpers/passwordValidator';
-import StudentVerificationPage from './studentVerification';
+import { UserContext } from './UserContext';
 
 export default function LoginScreen({ navigation }) {
+  const { setUser } = useContext(UserContext);
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
 
@@ -24,7 +25,6 @@ export default function LoginScreen({ navigation }) {
       setPassword({ ...password, error: passwordError });
       return;
     }
-
 
     try {
       const response = await fetch('http://127.0.0.1:3000/login', {
@@ -41,20 +41,23 @@ export default function LoginScreen({ navigation }) {
       const jsonResponse = await response.json();
 
       if (response.ok) {
-        // Check the role from the response and navigate accordingly
-        const { role } = jsonResponse;
+        const { role, email } = jsonResponse;
+        const user = email.split('@')[0];
+        setUser({ email, role, user });
         console.log("Role is ::", role);
+        console.log("user is ::", user);
+
         switch (true) {  // Using true as a condition to compare multiple values
-          case /author/i.test(role):  // Case-insensitive match for 'author'
+          case /author/i.test(role):
             navigation.replace('AuthorsPage');
             break;
-          case /author-wait/i.test(role):  // Case-insensitive match for 'author-wait'
+          case /author-wait/i.test(role):
             navigation.replace('AuthorWaitPage');
             break;
-          case /student/i.test(role):  // Case-insensitive match for 'student'
+          case /student/i.test(role):
             navigation.replace('StudentVerificationPage');
             break;
-          case /admin/i.test(role):  // Case-insensitive match for 'admin'
+          case /admin/i.test(role):
             navigation.replace('AdminDashboard');
             break;
           default:

@@ -14,12 +14,12 @@ const Australia = ({ navigation }) => {
     }, [])
 
     /* const newsResponse = async() => {
-        const response = await newAPI.get('everything?q=tesla&from=2021-07-19&sortBy=publishedAt&apiKey=920deb9f754348c0bec4871fef36d971')
+        const response = await newAPI.get('everything?q=tesla&from=2021-07-19&sortBy=publishedAt&apiKey=126f7f4b15e5441aa59dfe9edbf6a08a')
         console.log(response.data)
     } */
 
     function getNewsFromAPI() {
-        newAPI.get('top-headlines?country=au&apiKey=920deb9f754348c0bec4871fef36d971')
+        newAPI.get('top-headlines?country=au&apiKey=126f7f4b15e5441aa59dfe9edbf6a08a')
         .then(async function(response){
             setNewsTech(response.data)
         })
