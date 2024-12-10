@@ -24,22 +24,27 @@ const UserMenu = ({ userName, navigation, onLogout }) => {
       </TouchableOpacity>
       {isMenuVisible && (
         <View style={styles.userMenuDropdown}>
-          <TouchableOpacity onPress={() => {
-            setMenuVisible(false);
-            navigation.navigate('ProfileScreen');
-          }}>
+          <TouchableOpacity
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate('StudentProfile'); // Redirect to StudentProfile screen
+            }}
+          >
             <Text style={styles.userMenuItem}>View Profile</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => {
-            setMenuVisible(false);
-            onLogout();
-          }}>
+          <TouchableOpacity
+            onPress={() => {
+              setMenuVisible(false);
+              onLogout();
+            }}
+          >
             <Text style={styles.userMenuItem}>Logout</Text>
           </TouchableOpacity>
         </View>
       )}
     </View>
   );
+  
 };
 const HomeScreen = () => {
   const [isLoading, setLoading] = useState(true);

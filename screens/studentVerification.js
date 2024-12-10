@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios'; // Import axios
 
-const StudentVerificationPage = ({ navigation }) => {  // Ensure navigation prop is passed
+const StudentVerificationPage = ({ navigation }) => {
   const [studentName, setStudentName] = useState('');
   const [studentUniversity, setStudentUniversity] = useState('');
   const [enrollmentNumber, setEnrollmentNumber] = useState('');
@@ -29,20 +30,50 @@ const StudentVerificationPage = ({ navigation }) => {  // Ensure navigation prop
     }
   };
 
-  const handleVerifyStudent = () => {
+  const handleVerifyStudent = async () => {
     if (!studentName || !studentUniversity || !enrollmentNumber || !frontPhoto || !backPhoto) {
       Alert.alert('Validation Error', 'Please fill out all fields and upload both ID card photos.');
       return;
     }
-
-    Alert.alert('Verification Submitted!', 'Student verification has been successfully submitted.');
-    setStudentName('');
-    setStudentUniversity('');
-    setEnrollmentNumber('');
-    setFrontPhoto(null);
-    setBackPhoto(null);
+  
+    try {
+      const formData = new FormData();
+      formData.append('studentName', studentName);
+      formData.append('studentUniversity', studentUniversity);
+      formData.append('enrollmentNumber', enrollmentNumber);
+      formData.append('frontPhoto', {
+        uri: frontPhoto,
+        type: 'image/jpeg',
+        name: 'frontPhoto.jpg',
+      });
+      formData.append('backPhoto', {
+        uri: backPhoto,
+        type: 'image/jpeg',
+        name: 'backPhoto.jpg',
+      });
+  
+      const response = await axios.post('http://127.0.0.1:3000/verifyStudent', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      if (response.status === 200) {
+        setStudentName('');
+        setStudentUniversity('');
+        setEnrollmentNumber('');
+        setFrontPhoto(frontPhoto);
+        setBackPhoto(backPhoto);
+      } else {
+        console.log('Error', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error submitting verification:', error);
+      console.log('Error', 'Something went wrong while submitting verification.');
+    }
   };
-
+  
+  
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>

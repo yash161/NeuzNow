@@ -25,15 +25,21 @@ export default function RegisterScreen({ navigation }) {
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
     const retypePasswordError = password.value !== retypePassword.value ? "Passwords don't match" : '';
-
-    if (emailError || passwordError || nameError || retypePasswordError) {
+  
+    // Additional validation for student role requiring .edu email
+    let roleEmailError = '';
+    if (role === 'Student' && !email.value.endsWith('.edu')) {
+      roleEmailError = 'Students must use a .edu email address.';
+    }
+  
+    if (emailError || passwordError || nameError || retypePasswordError || roleEmailError) {
       setName({ ...name, error: nameError });
-      setEmail({ ...email, error: emailError });
+      setEmail({ ...email, error: emailError || roleEmailError });
       setPassword({ ...password, error: passwordError });
       setRetypePassword({ ...retypePassword, error: retypePasswordError });
       return;
     }
-
+  
     try {
       const response = await axios.post('http://127.0.0.1:3000/register', {
         name: name.value,
@@ -42,12 +48,12 @@ export default function RegisterScreen({ navigation }) {
         retypePassword: retypePassword.value,
         role: role,
       });
-
+  
       if (response.status === 201) {
         Alert.alert('Success', 'Registration successful!');
-        
-        const roleLower = role.toLowerCase(); 
-
+  
+        const roleLower = role.toLowerCase();
+  
         if (roleLower === 'admin') {
           navigation.reset({
             index: 0,
@@ -61,7 +67,7 @@ export default function RegisterScreen({ navigation }) {
         } else if (roleLower === 'student') {
           navigation.reset({
             index: 0,
-            routes: [{ name: 'StudentVerificationPage' }],
+            routes: [{ name: 'Home' }],
           });
         } else {
           navigation.reset({
@@ -78,6 +84,7 @@ export default function RegisterScreen({ navigation }) {
       }
     }
   };
+  
 
   return (
     <Background>

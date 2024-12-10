@@ -25,20 +25,35 @@ const App = () => {
   return (
     <UserProvider>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="LoginScreen">
+          <Stack.Navigator initialRouteName="LoginScreen">
         {/* LoginScreen */}
+        <Stack.Screen 
+                  name="LoginScreen" 
+          component={LoginScreen} 
+          options={{ headerShown: false }} 
+        />
         <Stack.Screen 
         
           name="LoginScreen" 
           component={LoginScreen} 
           options={{ headerShown: false }} 
         />
+             <Stack.Screen 
+        name="UserProfile" 
+        component={UserProfile} 
+        options={{ headerShown: false }} 
+      />
         <Stack.Screen name="AddBlog" component={AddBlog} options={{ headerShown: false }} />
 
         {/* Register Screen */}
         <Stack.Screen 
           name="RegisterScreen" 
           component={RegisterScreen} 
+          options={{ headerShown: false }} 
+        />
+          <Stack.Screen 
+          name="StudentProfile" 
+          component={StudentProfile} 
           options={{ headerShown: false }} 
         />
 
