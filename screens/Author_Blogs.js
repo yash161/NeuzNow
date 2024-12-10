@@ -5,11 +5,12 @@ import {
   StyleSheet,
   ActivityIndicator,
   FlatList,
+  TouchableOpacity,
 } from 'react-native';
 import themeContext from '../config/themeContext';
 import axios from 'axios';
 
-const GetAuthors = () => {
+const GetAuthors = ({ navigation }) => {
   const [authorNews, setAuthorNews] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const theme = useContext(themeContext);
@@ -43,6 +44,14 @@ const GetAuthors = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backColor }]}>
+      {/* Back Button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.navigate('Home')} // Navigate to the home page
+      >
+        <Text style={styles.backButtonText}>{'<-'}</Text>
+      </TouchableOpacity>
+
       {isLoading ? (
         <ActivityIndicator size="large" color={theme.textColor} style={styles.loader} />
       ) : (
@@ -71,6 +80,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     paddingTop: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+    zIndex: 1,
+  },
+  backButtonText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   loader: {
     marginTop: 20,

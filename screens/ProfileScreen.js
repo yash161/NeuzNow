@@ -23,17 +23,16 @@ const ProfileScreen = () => {
   const [blogs, setBlogs] = useState([]);
   const [profilePhoto, setProfilePhoto] = useState(require('../assets/UML_State_2_updated.png'));
   const { user } = useContext(UserContext);
-  const [studentName, setUserName] = useState(user?.user || 'Guest'); 
+  const [studentName, setUserName] = useState(user?.user || 'Guest');
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const theme = useContext(themeContext);
   const navigation = useNavigation();
 
   useEffect(() => {
     const fetchBlogs = async () => {
-      console.log("Inside blogs");
-      if (!studentName) return; // Ensure the name is available before fetching blogs
+      if (!studentName) return;
       try {
-        const response = await newAPI.get(`http://127.0.0.1:3000/displayblogs?user=${studentName}`); // Use studentName dynamically
+        const response = await newAPI.get(`http://127.0.0.1:3000/displayblogs?user=${studentName}`);
         setBlogs(response.data.blogs || []);
       } catch (error) {
         console.error('Error fetching blogs:', error);
@@ -41,10 +40,10 @@ const ProfileScreen = () => {
         setIsLoading(false);
       }
     };
-  
+
     fetchBlogs();
-  }, [studentName]); // Trigger fetching blogs whenever the studentName changes
-  
+  }, [studentName]);
+
   const selectProfilePhoto = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
@@ -76,16 +75,22 @@ const ProfileScreen = () => {
     <View style={[styles.container, { backgroundColor: theme.backColor }]}>
       {/* Header Section */}
       <LinearGradient colors={['#4c669f', '#3b5998', '#192f6a']} style={styles.header}>
+        {/* Back Button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate('Home')}
+        >
+          <Text style={styles.backButtonText}>{'<-'}</Text>
+        </TouchableOpacity>
+
+        {/* Profile Details */}
         <View style={styles.profileContainer}>
-          {/* Profile Details */}
           <TouchableOpacity onPress={selectProfilePhoto}>
             <Image source={profilePhoto} style={styles.profileImage} />
           </TouchableOpacity>
           <View style={styles.profileDetails}>
             <TouchableOpacity onPress={handleEditName}>
-              <Text style={[styles.userName, { color: theme.textColor }]}>
-                {studentName}
-              </Text>
+              <Text style={[styles.userName, { color: theme.textColor }]}>{studentName}</Text>
             </TouchableOpacity>
             <Text style={[styles.blogCount, { color: theme.textColor }]}>
               Total Blogs: {blogs.length}
@@ -100,7 +105,6 @@ const ProfileScreen = () => {
             >
               <Text style={styles.addBlogText}>Add Blog</Text>
             </TouchableOpacity>
-            
           </View>
         </View>
       </LinearGradient>
@@ -139,7 +143,7 @@ const ProfileScreen = () => {
             <TextInput
               style={styles.input}
               value={studentName}
-              onChangeText={studentName}
+              onChangeText={setUserName}
               placeholder="Enter your name"
               placeholderTextColor="#aaa"
             />
@@ -158,12 +162,24 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 10,
+    top: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginLeft: 50,
   },
   profileImage: {
     width: 60,
@@ -172,7 +188,7 @@ const styles = StyleSheet.create({
   },
   profileDetails: {
     marginLeft: 10,
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
   },
   userName: {
     fontSize: 16,

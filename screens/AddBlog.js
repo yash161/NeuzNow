@@ -1,11 +1,10 @@
-import React, { useState ,useContext} from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Image,
   Alert,
   ScrollView,
 } from 'react-native';
@@ -45,10 +44,10 @@ const AddBlog = ({ navigation, route }) => {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
-  
+
     try {
-      const newBlog = {studentName ,title, content: blogContent };
-  
+      const newBlog = { studentName, title, content: blogContent };
+
       await newAPI.post('http://127.0.0.1:3000/blogs', newBlog);
       Alert.alert('Success', 'Blog published successfully!');
       updateBlogsCount(); // Call the callback to update blogs count
@@ -58,9 +57,17 @@ const AddBlog = ({ navigation, route }) => {
       Alert.alert('Error', 'Something went wrong while publishing the blog.');
     }
   };
-  
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.navigate('ProfileScreen')}
+      >
+        <Text style={styles.backButtonText}>{'<-'}</Text>
+      </TouchableOpacity>
+
       <Text style={styles.headerText}>Add New Blog</Text>
 
       {/* Title Input */}
@@ -83,7 +90,6 @@ const AddBlog = ({ navigation, route }) => {
         numberOfLines={10}
       />
 
-
       {/* Publish Button */}
       <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
         <Text style={styles.publishButtonText}>Publish Blog</Text>
@@ -97,6 +103,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+    zIndex: 1,
+  },
+  backButtonText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   headerText: {
     fontSize: 22,
@@ -115,26 +132,6 @@ const styles = StyleSheet.create({
   textArea: {
     height: 150,
     textAlignVertical: 'top',
-  },
-  imagePicker: {
-    height: 150,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 15,
-    backgroundColor: '#f8f8f8',
-  },
-  imagePickerText: {
-    color: '#666',
-    fontSize: 16,
-  },
-  imagePreview: {
-    width: '100%',
-    height: 150,
-    borderRadius: 8,
-    marginBottom: 15,
   },
   publishButton: {
     backgroundColor: '#4c669f',
