@@ -12,6 +12,7 @@ import Card from '../components/Card';
 import YourCalendarComponent from '../components/YourCalendarComponent';
 import themeContext from '../config/themeContext';
 import { UserContext } from './UserContext';
+import GetAuthors from './Author_Blogs';
 const Tab = createBottomTabNavigator();
 
 const UserMenu = ({ userName, navigation, onLogout }) => {
@@ -149,12 +150,15 @@ const HomeScreen = () => {
         }}>
           <Text style={styles.sidebarText}>Articles</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.sidebarItem} onPress={() => {
-          toggleSidebar();
-          alert('Blogs selected!');
-        }}>
-          <Text style={styles.sidebarText}>Blogs</Text>
-        </TouchableOpacity>
+        <TouchableOpacity 
+      style={styles.sidebarItem} 
+      onPress={() => {
+        toggleSidebar();
+        navigation.navigate('GetAuthors');
+      }}
+    >
+      <Text style={styles.sidebarText}>Blogs</Text>
+    </TouchableOpacity>
       </Animated.View>
 
       <LinearGradient colors={['#4c669f', '#3b5998', '#192f6a']} style={styles.headerContainer}>
