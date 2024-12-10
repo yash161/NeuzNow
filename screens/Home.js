@@ -27,7 +27,7 @@ const UserMenu = ({ userName, navigation, onLogout }) => {
           <TouchableOpacity
             onPress={() => {
               setMenuVisible(false);
-              navigation.navigate('StudentProfile'); // Redirect to StudentProfile screen
+              navigation.navigate('ProfileScreen'); // Redirect to StudentProfile screen
             }}
           >
             <Text style={styles.userMenuItem}>View Profile</Text>
