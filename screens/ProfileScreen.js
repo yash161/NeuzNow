@@ -87,13 +87,16 @@ const ProfileScreen = () => {
               Total Blogs: {blogs.length}
             </Text>
             <TouchableOpacity
-                style={styles.addBlogButton}
-                onPress={() =>
+              style={styles.addBlogButton}
+              onPress={() =>
                 navigation.navigate('AddBlog', {
-                updateBlogsCount: () => setBlogs([...blogs, {}]),})}>
-            <Text style={styles.addBlogText}>Add Blog</Text>
+                  updateBlogsCount: () => setBlogs([...blogs, {}]),
+                })
+              }
+            >
+              <Text style={styles.addBlogText}>Add Blog</Text>
             </TouchableOpacity>
-
+            
           </View>
         </View>
       </LinearGradient>
@@ -151,7 +154,7 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     flexDirection: 'row',
-    justifyContent: 'flex-end', // Align to the right
+    justifyContent: 'flex-end',
     alignItems: 'center',
   },
   profileContainer: {

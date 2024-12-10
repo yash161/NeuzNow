@@ -25,7 +25,7 @@ const App = () => {
   return (
     <UserProvider>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="GetAuthors">
+          <Stack.Navigator initialRouteName="LoginScreen">
         {/* LoginScreen */}
         <Stack.Screen 
                   name="LoginScreen" 
@@ -119,6 +119,7 @@ const App = () => {
           component={AuthorsPage} 
           options={{ headerShown: false }} 
         />
+    
       </Stack.Navigator>
     </NavigationContainer>
     </UserProvider>

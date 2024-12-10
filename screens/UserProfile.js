@@ -1,173 +1,257 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useContext } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  Modal,
+  Button,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
+import themeContext from '../config/themeContext';
+import newAPI from '../apis/News';
 
-const UserProfile = () => {
-  const [formData, setFormData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    retypePassword: "",
-    currentInterest: "",
-  });
+const ProfileScreen = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [blogs, setBlogs] = useState([]);
+  const [profilePhoto, setProfilePhoto] = useState(require('../assets/UML_State_2_updated.png'));
+  const [studentName, setStudentName] = useState('Student Name');
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const theme = useContext(themeContext);
+  const navigation = useNavigation();
 
-  const [errors, setErrors] = useState({
-    currentPassword: "",
-    newPassword: "",
-    retypePassword: "",
-    currentInterest: "",
-  });
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await newAPI.get('/student/blogs?userId=123'); // Replace with your API endpoint
+        setBlogs(response.data.blogs || []);
+      } catch (error) {
+        console.error('Error fetching blogs:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
+    fetchBlogs();
+  }, []);
+
+  const selectProfilePhoto = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
     });
+
+    if (!pickerResult.canceled) {
+      setProfilePhoto({ uri: pickerResult.assets[0].uri });
+    }
   };
 
-  const validatePassword = (password) => {
-    const capitalLetter = /[A-Z]/;
-    return capitalLetter.test(password) && password.length >= 8;
+  const handleEditName = () => {
+    setIsEditModalVisible(true);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    let formErrors = { ...errors };
-
-    // Password validation
-    if (!validatePassword(formData.newPassword)) {
-      formErrors.newPassword = "Password must have at least one capital letter and be at least 8 characters long.";
-    } else {
-      formErrors.newPassword = "";
-    }
-
-    if (formData.newPassword !== formData.retypePassword) {
-      formErrors.retypePassword = "Passwords do not match.";
-    } else {
-      formErrors.retypePassword = "";
-    }
-
-    setErrors(formErrors);
-
-    if (!formErrors.newPassword && !formErrors.retypePassword) {
-      // Process the form data (e.g., send to server)
-      alert("Profile updated successfully!");
-    }
+  const saveName = () => {
+    setIsEditModalVisible(false);
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>User Profile</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        {/* Current Password */}
-        <div style={styles.inputGroup}>
-          <label htmlFor="currentPassword" style={styles.label}>Current Password:</label>
-          <input
-            type="password"
-            id="currentPassword"
-            name="currentPassword"
-            value={formData.currentPassword}
-            onChange={handleInputChange}
-            style={styles.input}
-          />
-        </div>
+    <View style={[styles.container, { backgroundColor: theme.backColor }]}>
+      {/* Header Section */}
+      <LinearGradient colors={['#4c669f', '#3b5998', '#192f6a']} style={styles.header}>
+        <View style={styles.profileContainer}>
+          {/* Profile Details */}
+          <TouchableOpacity onPress={selectProfilePhoto}>
+            <Image source={profilePhoto} style={styles.profileImage} />
+          </TouchableOpacity>
+          <View style={styles.profileDetails}>
+            <TouchableOpacity onPress={handleEditName}>
+              <Text style={[styles.userName, { color: theme.textColor }]}>
+                {studentName}
+              </Text>
+            </TouchableOpacity>
+            <Text style={[styles.blogCount, { color: theme.textColor }]}>
+              Total Blogs: {blogs.length}
+            </Text>
+            <TouchableOpacity
+              style={styles.addBlogButton}
+              onPress={() =>
+                navigation.navigate('AddBlog', {
+                  updateBlogsCount: () => setBlogs([...blogs, {}]),
+                })
+              }
+            >
+              <Text style={styles.addBlogText}>Add Blog</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.addBlogButton}
+              onPress={() => navigation.navigate('UserProfile')}
+            >
+              <Text style={styles.addBlogText}>Update Profile</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </LinearGradient>
 
-        {/* New Password */}
-        <div style={styles.inputGroup}>
-          <label htmlFor="newPassword" style={styles.label}>New Password:</label>
-          <input
-            type="password"
-            id="newPassword"
-            name="newPassword"
-            value={formData.newPassword}
-            onChange={handleInputChange}
-            style={styles.input}
-          />
-          {errors.newPassword && <p style={styles.error}>{errors.newPassword}</p>}
-        </div>
+      {/* Blogs Section */}
+      <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Your Blogs</Text>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#0096FF" />
+      ) : blogs.length > 0 ? (
+        <FlatList
+          data={blogs}
+          keyExtractor={(item, index) => `blog-${index}`}
+          numColumns={3}
+          contentContainerStyle={styles.blogsGrid}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.blogCard}
+              onPress={() => navigation.navigate('BlogDetail', { blog: item })}
+            >
+              <Image source={{ uri: item.image }} style={styles.blogImage} />
+              <Text style={styles.blogTitle} numberOfLines={2}>
+                {item.title}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      ) : (
+        <Text style={[styles.noBlogsText, { color: theme.textColor }]}>No Blogs Uploaded</Text>
+      )}
 
-        {/* Retype Password */}
-        <div style={styles.inputGroup}>
-          <label htmlFor="retypePassword" style={styles.label}>Retype Password:</label>
-          <input
-            type="password"
-            id="retypePassword"
-            name="retypePassword"
-            value={formData.retypePassword}
-            onChange={handleInputChange}
-            style={styles.input}
-          />
-          {errors.retypePassword && <p style={styles.error}>{errors.retypePassword}</p>}
-        </div>
-
-        {/* Current Interest */}
-        <div style={styles.inputGroup}>
-          <label htmlFor="currentInterest" style={styles.label}>Current Interest:</label>
-          <input
-            type="text"
-            id="currentInterest"
-            name="currentInterest"
-            value={formData.currentInterest}
-            onChange={handleInputChange}
-            style={styles.input}
-          />
-        </div>
-
-        {/* Submit Button */}
-        <button type="submit" style={styles.submitButton}>Update Profile</button>
-      </form>
-    </div>
+      {/* Modal for Editing Name */}
+      <Modal visible={isEditModalVisible} transparent={true} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Edit Name</Text>
+            <TextInput
+              style={styles.input}
+              value={studentName}
+              onChangeText={setStudentName}
+              placeholder="Enter your name"
+              placeholderTextColor="#aaa"
+            />
+            <Button title="Save" onPress={saveName} />
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
-    maxWidth: "600px",
-    margin: "0 auto",
-    padding: "2rem",
-    backgroundColor: "#fff",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    fontFamily: "'Arial', sans-serif",
-    color: "#333",
+    flex: 1,
   },
-  heading: {
-    textAlign: "center",
-    marginBottom: "2rem",
-    fontSize: "1.8rem",
+  header: {
+    padding: 20,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
-  form: {
-    display: "flex",
-    flexDirection: "column",
+  profileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  inputGroup: {
-    marginBottom: "1.5rem",
+  profileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
-  label: {
-    fontSize: "1rem",
-    marginBottom: "0.5rem",
+  profileDetails: {
+    marginLeft: 10,
+    alignItems: 'flex-end',
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  blogCount: {
+    fontSize: 14,
+    marginTop: 5,
+  },
+  addBlogButton: {
+    marginTop: 10,
+    backgroundColor: '#3b5998',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  addBlogText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+    marginHorizontal: 10,
+  },
+  blogsGrid: {
+    paddingHorizontal: 10,
+  },
+  blogCard: {
+    flex: 1,
+    margin: 5,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    elevation: 2,
+  },
+  blogImage: {
+    width: '100%',
+    height: 100,
+  },
+  blogTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    padding: 5,
+    textAlign: 'center',
+  },
+  noBlogsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    marginTop: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
   input: {
-    padding: "0.75rem",
-    fontSize: "1rem",
-    border: "1px solid #ccc",
-    borderRadius: "5px",
-    width: "100%",
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    fontSize: 16,
   },
-  error: {
-    color: "red",
-    fontSize: "0.875rem",
-    marginTop: "0.5rem",
-  },
-  submitButton: {
-    padding: "0.75rem",
-    fontSize: "1rem",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    transition: "background-color 0.3s",
-  },
-};
+});
 
-export default UserProfile;
+export default ProfileScreen;

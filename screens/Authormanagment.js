@@ -58,26 +58,32 @@ const ManageAuthors = () => {
       console.error('Error deleting author:', error);
     }
   };
-  
+
   const renderAuthor = ({ item }) => (
     <View style={styles.row}>
       <Text style={[styles.cell, { flex: 2 }]}>{item.name}</Text>
       <Text style={[styles.cell, { flex: 2 }]}>{item.email}</Text>
+      <Text style={[styles.cell, { flex: 1 }]}>{item.role}</Text>
       <Text style={[styles.cell, { flex: 1 }]}>{item.verified === 'unverified' ? 'No' : 'Yes'}</Text>
       <View style={[styles.cell, styles.actionsCell]}>
-        <Button mode="contained" onPress={() => handleVerify(item.email)} style={styles.actionButton}>
-          Verify
-        </Button>
-        <Button
-  mode="contained"
-  onPress={() => handleDelete(item.email)} // Directly call handleDelete
-  color="red"
-  style={styles.actionButton}
->
-  Delete
-</Button>
-
-
+        {item.verified === 'unverified' ? (
+          <Button
+            mode="contained"
+            onPress={() => handleVerify(item.email)}
+            style={[styles.actionButton, { backgroundColor: '#4CAF50' }]} // Green for Verify
+          >
+            Verify
+          </Button>
+        ) : (
+          <Button
+            mode="contained"
+            onPress={() => handleDelete(item.email)}
+            color="red"
+            style={[styles.actionButton, { backgroundColor: '#F44336' }]} // Red for Delete
+          >
+            Delete
+          </Button>
+        )}
       </View>
     </View>
   );
@@ -92,6 +98,7 @@ const ManageAuthors = () => {
           <View style={styles.tableHeader}>
             <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Name</Text>
             <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Email</Text>
+            <Text style={[styles.cell, styles.headerCell, { flex: 1 }]}>Role</Text>
             <Text style={[styles.cell, styles.headerCell, { flex: 1 }]}>Verified</Text>
             <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Actions</Text>
           </View>
@@ -109,33 +116,37 @@ const ManageAuthors = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    padding: 15,
   },
   loader: {
     marginTop: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 15,
     alignSelf: 'center',
   },
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#638cbd',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
+    marginBottom: 10,
+    elevation: 3, // To add shadow effect to the header
   },
   row: {
     flexDirection: 'row',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f9f9f9',
     marginVertical: 5,
-    borderRadius: 5,
-    padding: 10,
+    borderRadius: 8,
+    padding: 12,
+    elevation: 2, // Shadow effect for rows
   },
   cell: {
     fontSize: 16,
-    paddingHorizontal: 5,
+    paddingHorizontal: 10,
+    color: '#333',
   },
   headerCell: {
     fontWeight: 'bold',
@@ -147,6 +158,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginHorizontal: 5,
+    paddingVertical: 5,
   },
 });
 

@@ -11,7 +11,7 @@
     "@aws-sdk/client-s3": "^3.705.0",
     "@expo/vector-icons": "^12.0.5",
     "@google/generative-ai": "^0.21.0",
-    "@react-native-async-storage/async-storage": "^2.1.0",
+    "@react-native-async-storage/async-storage": "^1.15.0",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-picker/picker": "^2.10.2",
     "@react-navigation/bottom-tabs": "^6.0.9",
