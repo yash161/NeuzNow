@@ -16,20 +16,24 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import themeContext from '../config/themeContext';
 import newAPI from '../apis/News';
+import { UserContext } from './UserContext';
 
 const ProfileScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [blogs, setBlogs] = useState([]);
   const [profilePhoto, setProfilePhoto] = useState(require('../assets/UML_State_2_updated.png'));
-  const [studentName, setStudentName] = useState('Student Name');
+  const { user } = useContext(UserContext);
+  const [studentName, setUserName] = useState(user?.user || 'Guest'); 
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const theme = useContext(themeContext);
   const navigation = useNavigation();
 
   useEffect(() => {
     const fetchBlogs = async () => {
+      console.log("Inside blogs");
+      if (!studentName) return; // Ensure the name is available before fetching blogs
       try {
-        const response = await newAPI.get('/student/blogs?userId=123'); // Replace with your API endpoint
+        const response = await newAPI.get(`http://127.0.0.1:3000/displayblogs?user=${studentName}`); // Use studentName dynamically
         setBlogs(response.data.blogs || []);
       } catch (error) {
         console.error('Error fetching blogs:', error);
@@ -37,10 +41,10 @@ const ProfileScreen = () => {
         setIsLoading(false);
       }
     };
-
+  
     fetchBlogs();
-  }, []);
-
+  }, [studentName]); // Trigger fetching blogs whenever the studentName changes
+  
   const selectProfilePhoto = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
@@ -135,7 +139,7 @@ const ProfileScreen = () => {
             <TextInput
               style={styles.input}
               value={studentName}
-              onChangeText={setStudentName}
+              onChangeText={studentName}
               placeholder="Enter your name"
               placeholderTextColor="#aaa"
             />

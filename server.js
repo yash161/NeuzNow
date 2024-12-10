@@ -117,6 +117,49 @@ app.get('/authors', async (req, res) => {
     res.status(500).json({ message: 'Server error.' }); // Handle errors
   }
 });
+app.post('/blogs', async (req, res) => {
+  const { title, content, studentName } = req.body; // Include studentName
+
+  if (!title || !content || !studentName) {
+    return res.status(400).json({ message: 'Title, content, and studentName are required.' });
+  }
+
+  try {
+    const query = 'INSERT INTO Blogs (title, content, studentName) VALUES (?, ?, ?)';
+    const [result] = await db.promise().query(query, [title, content, studentName]);
+    res.status(201).json({ message: 'Blog created successfully!', blogId: result.insertId });
+  } catch (error) {
+    console.error('Error creating blog:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+app.get('/displayblogs', async (req, res) => {
+  const studentName = req.query.user; // Extract studentName from the query parameter
+
+  if (!studentName) {
+    return res.status(400).json({ message: 'Student name is required' });
+  }
+
+  try {
+    // Query to fetch blogs for a specific studentName
+    const query = 'SELECT * FROM Blogs WHERE studentName = ?';
+    
+    // Use promises to query the database asynchronously
+    const [results] = await db.promise().query(query, [studentName]);
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No blogs found for this student' });
+    }
+
+    // Return the blogs in the response
+    res.status(200).json({ blogs: results });
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    res.status(500).json({ message: 'Error fetching blogs' });
+  }
+});
+
+
 // Endpoint to delete an author
 app.post('/submitNews', (req, res) => {
   const { authorName, email, newsEntries } = req.body;

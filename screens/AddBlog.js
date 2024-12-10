@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useContext} from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,14 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import newAPI from '../apis/News';
+import { UserContext } from './UserContext';
 
 const AddBlog = ({ navigation, route }) => {
   const { updateBlogsCount } = route.params; // Callback to update blog count in profile
   const [title, setTitle] = useState('');
   const [blogContent, setBlogContent] = useState('');
+  const { user } = useContext(UserContext);
+  const [studentName, setUserName] = useState(user?.user || 'Guest');
   const [selectedImage, setSelectedImage] = useState(null);
 
   const selectImage = async () => {
@@ -38,19 +41,15 @@ const AddBlog = ({ navigation, route }) => {
   };
 
   const handlePublish = async () => {
-    if (!title.trim() || !blogContent.trim() || !selectedImage) {
-      Alert.alert('Error', 'Please fill in all fields and add a photo.');
+    if (!title.trim() || !blogContent.trim()) {
+      Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
-
+  
     try {
-      const newBlog = {
-        title,
-        content: blogContent,
-        image: selectedImage.uri, // Replace with actual file upload logic
-      };
-
-      await newAPI.post('/student/blogs', newBlog); // Replace with your API endpoint
+      const newBlog = {studentName ,title, content: blogContent };
+  
+      await newAPI.post('http://127.0.0.1:3000/blogs', newBlog);
       Alert.alert('Success', 'Blog published successfully!');
       updateBlogsCount(); // Call the callback to update blogs count
       navigation.goBack(); // Navigate back to the profile
@@ -59,7 +58,7 @@ const AddBlog = ({ navigation, route }) => {
       Alert.alert('Error', 'Something went wrong while publishing the blog.');
     }
   };
-
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.headerText}>Add New Blog</Text>
@@ -84,14 +83,6 @@ const AddBlog = ({ navigation, route }) => {
         numberOfLines={10}
       />
 
-      {/* Image Picker */}
-      {selectedImage ? (
-        <Image source={selectedImage} style={styles.imagePreview} />
-      ) : (
-        <TouchableOpacity style={styles.imagePicker} onPress={selectImage}>
-          <Text style={styles.imagePickerText}>Add Blog Photo</Text>
-        </TouchableOpacity>
-      )}
 
       {/* Publish Button */}
       <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
