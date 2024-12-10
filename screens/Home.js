@@ -148,7 +148,6 @@ const HomeScreen = () => {
           toggleSidebar();
           alert('Articles selected!');
         }}>
-          <Text style={styles.sidebarText}>Articles</Text>
         </TouchableOpacity>
         <TouchableOpacity 
       style={styles.sidebarItem} 
