@@ -7,7 +7,8 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Button, IconButton } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import themeContext from '../config/themeContext';
 import axios from 'axios';
 
@@ -15,6 +16,7 @@ const ManageAuthors = () => {
   const [authors, setAuthors] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const theme = useContext(themeContext);
+  const navigation = useNavigation();
 
   // Fetch authors from the API
   useEffect(() => {
@@ -90,11 +92,19 @@ const ManageAuthors = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backColor }]}>
+      <View style={styles.header}>
+        <IconButton
+          icon="arrow-left"
+          size={24}
+          color={theme.textColor}
+          onPress={() => navigation.goBack()}
+        />
+        <Text style={[styles.title, { color: theme.textColor }]}>Manage Authors</Text>
+      </View>
       {isLoading ? (
         <ActivityIndicator size="large" color={theme.textColor} style={styles.loader} />
       ) : (
         <>
-          <Text style={[styles.title, { color: theme.textColor }]}>Manage Authors</Text>
           <View style={styles.tableHeader}>
             <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Name</Text>
             <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Email</Text>
@@ -118,14 +128,19 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 15,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
   loader: {
     marginTop: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 15,
-    alignSelf: 'center',
+    flex: 1,
+    textAlign: 'center',
   },
   tableHeader: {
     flexDirection: 'row',
