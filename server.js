@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: true }));  // Add this line
 app.use(express.json());  
 // Create MySQL connection
 const db = mysql.createConnection({
-  host: '100.27.37.187',
+  host: '44.213.117.61',
   user: 'root',
   password: 'neuz@123',
   database: 'auth_db',
