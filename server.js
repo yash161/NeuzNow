@@ -110,7 +110,7 @@ app.post('/login', async (req, res) => {
 app.get('/authors', async (req, res) => {
   try {
     // Querying the 'User_details' table to get authors where the User role is 'Author'
-    const [authors] = await db.promise().query('SELECT name, email, verified FROM User_details WHERE User = "Author"');
+    const [authors] = await db.promise().query('SELECT name, email, verified FROM User_details');
     res.status(200).json(authors); // Respond with authors' data
   } catch (error) {
     console.error('Error fetching authors:', error);
@@ -234,7 +234,7 @@ app.delete('/delete-author/:email', async (req, res) => {
 
   try {
     const [result] = await db.promise().query(
-      'DELETE FROM User_details WHERE email = ? AND User = "Author"',
+      'DELETE FROM User_details WHERE email = ? ',
       [email]
     );
 
@@ -301,7 +301,7 @@ app.post('/verify-author', async (req, res) => {
   try {
     // Update the 'verified' status of the author
     const [result] = await db.promise().query(
-      'UPDATE User_details SET verified = ? WHERE email = ? AND User = "Author"',
+      'UPDATE User_details SET verified = ? WHERE email = ? ',
       ['verified', email]
     );
 
