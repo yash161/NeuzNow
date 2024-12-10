@@ -15,7 +15,6 @@ const GetAuthors = ({ navigation }) => {
   const [isLoading, setLoading] = useState(true);
   const theme = useContext(themeContext);
 
-  // Fetch authors and news data from the API
   useEffect(() => {
     fetchAuthorsNews();
   }, []);
@@ -24,7 +23,7 @@ const GetAuthors = ({ navigation }) => {
     setLoading(true);
     try {
       const response = await axios.get('http://localhost:3000/getAuthorNews');
-      setAuthorNews(response.data); // Assuming response.data is an array of author news
+      setAuthorNews(response.data);
     } catch (error) {
       console.error('Error fetching authors news:', error);
     } finally {
@@ -58,16 +57,16 @@ const GetAuthors = ({ navigation }) => {
         <>
           <Text style={[styles.title, { color: theme.textColor }]}>Author Blogs</Text>
           <View style={styles.tableHeader}>
-            <Text style={[styles.headerCell]}>Author</Text>
-            <Text style={[styles.headerCell]}>News ID</Text>
-            <Text style={[styles.headerCell]}>Category</Text>
-            <Text style={[styles.headerCell]}>Title</Text>
-            <Text style={[styles.headerCell]}>Content</Text>
+            <Text style={styles.headerCell}>Author</Text>
+            <Text style={styles.headerCell}>News ID</Text>
+            <Text style={styles.headerCell}>Category</Text>
+            <Text style={styles.headerCell}>Title</Text>
+            <Text style={styles.headerCell}>Content</Text>
           </View>
           <FlatList
             data={authorNews}
             renderItem={renderAuthorNews}
-            keyExtractor={(item) => item.news_id.toString()} // Use news_id as the unique key
+            keyExtractor={(item) => item.news_id.toString()}
           />
         </>
       )}
@@ -96,38 +95,39 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: '#34495E',
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#2C3E50',
+    backgroundColor: '#34495E',
     paddingVertical: 12,
     paddingHorizontal: 8,
+    borderRadius: 8,
     marginBottom: 10,
-    borderRadius: 5,
+    elevation: 2,
   },
   headerCell: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#FFF',
     flex: 1,
     textAlign: 'center',
   },
   row: {
     flexDirection: 'row',
-    backgroundColor: '#ECF0F1',
-    marginVertical: 5,
+    backgroundColor: '#F7F9F9',
     paddingVertical: 10,
     paddingHorizontal: 8,
-    borderRadius: 5,
-    borderBottomWidth: 1,
-    borderColor: '#BDC3C7',
+    borderRadius: 8,
+    marginBottom: 6,
+    elevation: 1,
   },
   cell: {
-    fontSize: 16,
+    fontSize: 14,
     flex: 1,
     textAlign: 'center',
     color: '#2C3E50',
