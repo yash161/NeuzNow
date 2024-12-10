@@ -17,6 +17,7 @@ import ManageAuthors from "./screens/Authormanagment";
 import AuthorProfile from "./screens/AuthorProfile";
 import StudentProfile from "./screens/StudentProfile";
 import UserProfile from "./screens/UserProfile";
+
 // Create a Stack Navigator
 const Stack = createStackNavigator();
 
@@ -24,12 +25,12 @@ const App = () => {
   return (
     <UserProvider>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="UserProfile">
+      <Stack.Navigator initialRouteName="LoginScreen">
         {/* LoginScreen */}
         <Stack.Screen 
         
-          name="UserProfile" 
-          component={UserProfile} 
+          name="LoginScreen" 
+          component={LoginScreen} 
           options={{ headerShown: false }} 
         />
         <Stack.Screen name="AddBlog" component={AddBlog} options={{ headerShown: false }} />
@@ -102,6 +103,12 @@ const App = () => {
           component={AuthorsPage} 
           options={{ headerShown: false }} 
         />
+        <Stack.Screen 
+          name="UserProfile" 
+          component={UserProfile} 
+          options={{ headerShown: false }} 
+        />
+    
       </Stack.Navigator>
     </NavigationContainer>
     </UserProvider>

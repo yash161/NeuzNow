@@ -26,7 +26,7 @@ const UserMenu = ({ userName, navigation, onLogout }) => {
         <View style={styles.userMenuDropdown}>
           <TouchableOpacity onPress={() => {
             setMenuVisible(false);
-            navigation.navigate('Profile');
+            navigation.navigate('ProfileScreen');
           }}>
             <Text style={styles.userMenuItem}>View Profile</Text>
           </TouchableOpacity>
@@ -41,7 +41,6 @@ const UserMenu = ({ userName, navigation, onLogout }) => {
     </View>
   );
 };
-
 const HomeScreen = () => {
   const [isLoading, setLoading] = useState(true);
   const [news, setNews] = useState([]);
