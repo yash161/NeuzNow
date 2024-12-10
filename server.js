@@ -219,6 +219,32 @@ NeuzNow`,
     res.status(500).json({ message: 'Server error.' });
   }
 });
+app.get('/getAuthorNews', (req, res) => {
+  const query = `
+    SELECT 
+      Authors.id AS author_id,
+      Authors.name AS author_name,
+      Authors.email AS author_email,
+      News.id AS news_id,
+      News.category,
+      News.title,
+      News.content
+    FROM 
+      Authors
+    JOIN 
+      News ON Authors.id = News.author_id;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching data:', err);
+      return res.status(500).json({ error: 'An error occurred while fetching data.' });
+    }
+
+    // Send results to the client
+    res.status(200).json(results);
+  });
+});
 
 
 // Endpoint to verify an author
