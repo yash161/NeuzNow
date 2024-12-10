@@ -110,7 +110,7 @@ app.post('/login', async (req, res) => {
 app.get('/authors', async (req, res) => {
   try {
     // Querying the 'User_details' table to get authors where the User role is 'Author'
-    const [authors] = await db.promise().query('SELECT name, email, verified FROM User_details');
+    const [authors] = await db.promise().query('SELECT name, email, User AS role, verified FROM User_details');
     res.status(200).json(authors); // Respond with authors' data
   } catch (error) {
     console.error('Error fetching authors:', error);
