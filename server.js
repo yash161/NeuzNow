@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: true }));  // Add this line
 app.use(express.json());  
 // Create MySQL connection
 const db = mysql.createConnection({
-  host: '100.26.148.160',
+  host: '100.27.37.187',
   user: 'root',
   password: 'neuz@123',
   database: 'auth_db',
@@ -118,6 +118,69 @@ app.get('/authors', async (req, res) => {
   }
 });
 // Endpoint to delete an author
+app.post('/submitNews', (req, res) => {
+  const { authorName, email, newsEntries } = req.body;
+  console.log("News", newsEntries);
+  if (!authorName || !email || !Array.isArray(newsEntries) || newsEntries.length === 0) {
+    return res.status(400).json({ message: 'Invalid input.' });
+  }
+
+  // Start transaction
+  db.beginTransaction(async (err) => {
+    if (err) return res.status(500).json({ message: 'Transaction error.', error: err });
+
+    try {
+      // Insert Author with Email
+      const [authorResult] = await db.promise().query('INSERT INTO Authors (name, email) VALUES (?, ?)', [authorName, email]);
+      const authorId = authorResult.insertId;
+
+      // Insert News Entries
+      const newsPromises = newsEntries.map((news) => {
+        const { category, title, content } = news;
+        return db.promise().query(
+          'INSERT INTO News (author_id, category, title, content) VALUES (?, ?, ?, ?)',
+          [authorId, category, title, content]
+        );
+      });
+
+      await Promise.all(newsPromises);
+
+      // Commit transaction
+      db.commit((err) => {
+        if (err) {
+          db.rollback(() => {
+            return res.status(500).json({ message: 'Commit error.', error: err });
+          });
+        } else {
+          // Send confirmation email after data is saved
+          const mailOptions = {
+            to: email,  // Use the email provided by the author
+            subject: 'We have received your news submission',
+            text: `Hello ${authorName},\n\nWe have successfully received your news submission. Our team is currently reviewing it. You will receive a notification once your submission has been approved.\n\nBest regards,\nThe NeuzNow Team`,
+          };
+
+          // Send the email
+          transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              console.log('Error sending email:', error);
+            } else {
+              console.log('Email sent:', info.response);
+            }
+          });
+
+          res.status(200).json({ message: 'Author and news saved successfully, and confirmation email sent.' });
+        }
+      });
+    } catch (error) {
+      // Rollback on error
+      db.rollback(() => {
+        res.status(500).json({ message: 'Transaction failed.', error });
+      });
+    }
+  });
+});
+
+
 
 app.delete('/delete-author/:email', async (req, res) => {
   const { email } = req.params;

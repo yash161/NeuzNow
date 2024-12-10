@@ -15,7 +15,7 @@ const categories = [
 
 const AuthorsPage = () => {
   const [authorName, setAuthorName] = useState('');
-  const [authorPhoto, setAuthorPhoto] = useState(null);
+  const [email, setEmail] = useState('');  // New state for email
   const [newsEntries, setNewsEntries] = useState([
     { category: '', title: '', content: '', document: null, documentName: null },
     { category: '', title: '', content: '', document: null, documentName: null },
@@ -24,19 +24,16 @@ const AuthorsPage = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // Handle back button press
     const backAction = () => {
-      // Reset the navigation stack to the Login page
       navigation.reset({
         index: 0,
         routes: [{ name: 'LoginScreen' }],
       });
-      return true; // Prevent the default back action
+      return true;
     };
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 
-    // Cleanup the listener on component unmount
     return () => backHandler.remove();
   }, [navigation]);
 
@@ -46,9 +43,11 @@ const AuthorsPage = () => {
     setNewsEntries(updatedNews);
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     const namePattern = /^[A-Za-z\s]+$/;
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;  // Email validation pattern
     const nameValid = namePattern.test(authorName);
+    const emailValid = emailPattern.test(email);  // Validate email
     const allFieldsFilled = newsEntries.every(
       (entry) => entry.category && entry.title && entry.content
     );
@@ -57,59 +56,58 @@ const AuthorsPage = () => {
     );
 
     if (!nameValid) {
-      Alert.alert('Validation Error', 'Author name can only contain letters and spaces.');
+      console.log('Validation Error: Author name can only contain letters and spaces.');
+      return;
+    }
+
+    if (!emailValid) {
+      console.log('Validation Error: Please enter a valid email address.');
       return;
     }
 
     if (!allFieldsFilled) {
-      Alert.alert('Validation Error', 'Please fill out all fields for each news entry.');
+      console.log('Validation Error: Please fill out all fields for each news entry.');
       return;
     }
 
     if (!wordCountValid) {
-      Alert.alert('Validation Error', 'News content cannot exceed 500 words.');
+      console.log('Validation Error: News content cannot exceed 500 words.');
       return;
     }
 
-    Alert.alert('News Published!', 'All news articles have been successfully published.');
-    setAuthorName('');
-    setAuthorPhoto(null);
-    setNewsEntries([
-      { category: '', title: '', content: '', document: null, documentName: null },
-      { category: '', title: '', content: '', document: null, documentName: null },
-      { category: '', title: '', content: '', document: null, documentName: null },
-    ]);
-  };
+    // Prepare the payload
+    const payload = {
+      authorName,
+      email,  // Include email in the payload
+      newsEntries,
+    };
 
-  const selectPhoto = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
-      Alert.alert('Permission Denied', 'You need to enable permission to access the photo library.');
-      return;
-    }
+    try {
+      const response = await fetch('http://127.0.0.1:3000/submitNews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setAuthorPhoto(result.assets[0].uri);
-    }
-  };
-
-  const pickDocument = async (index) => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: '*/*',
-    });
-
-    if (result.type === 'success') {
-      const updatedNews = [...newsEntries];
-      updatedNews[index].document = result.uri;
-      updatedNews[index].documentName = result.name;
-      setNewsEntries(updatedNews);
+      if (response.ok) {
+        const result = await response.json();
+        setAuthorName('');
+        setEmail('');  // Reset the email state after submission
+        setNewsEntries([
+          { category: '', title: '', content: '', document: null, documentName: null },
+          { category: '', title: '', content: '', document: null, documentName: null },
+          { category: '', title: '', content: '', document: null, documentName: null },
+        ]);
+        console.log('News submitted successfully:', result);
+        navigation.navigate('LoginScreen');
+      } else {
+        const error = await response.json();
+        console.log('Submission failed:', error);
+      }
+    } catch (error) {
+      console.log('Error during submission:', error);
     }
   };
 
@@ -135,6 +133,18 @@ const AuthorsPage = () => {
             value={authorName}
             onChangeText={setAuthorName}
             placeholderTextColor="#777"
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Author Email"
+            value={email}
+            onChangeText={setEmail}
+            placeholderTextColor="#777"
+            keyboardType="email-address"
           />
         </View>
 
@@ -164,15 +174,6 @@ const AuthorsPage = () => {
               numberOfLines={4}
               placeholderTextColor="#777"
             />
-            <TouchableOpacity
-              style={styles.uploadButton}
-              onPress={() => pickDocument(index)}
-            >
-              <Ionicons name="document-outline" size={20} color="#007BFF" />
-              <Text style={styles.uploadButtonText}>
-                {news.documentName ? `Uploaded: ${news.documentName}` : 'Upload Document'}
-              </Text>
-            </TouchableOpacity>
           </View>
         ))}
 
@@ -246,28 +247,6 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 5,
   },
-  photoContainer: {
-    marginBottom: 15,
-  },
-  uploadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  uploadButtonText: {
-    marginLeft: 5,
-    color: '#007BFF',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  backButtonText: {
-    fontSize: 18,
-    color: '#0056D2',
-    marginLeft: 10,
-  },
   verifyButton: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -283,11 +262,22 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginLeft: 10,
   },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#0056D2',
+    marginLeft: 10,
+  },
 });
 
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
-    height: 50,
+    paddingVertical: 10,
     paddingHorizontal: 15,
     borderWidth: 1,
     borderColor: '#DDDDDD',
@@ -297,7 +287,7 @@ const pickerSelectStyles = StyleSheet.create({
     color: '#333',
   },
   inputAndroid: {
-    height: 50,
+    paddingVertical: 10,
     paddingHorizontal: 15,
     borderWidth: 1,
     borderColor: '#DDDDDD',

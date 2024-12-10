@@ -24,7 +24,7 @@ const App = () => {
   return (
     <UserProvider>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="LoginScreen">
+      <Stack.Navigator initialRouteName="AuthorsPage">
         {/* LoginScreen */}
         <Stack.Screen 
                   name="LoginScreen" 
@@ -43,6 +43,11 @@ const App = () => {
         <Stack.Screen 
           name="RegisterScreen" 
           component={RegisterScreen} 
+          options={{ headerShown: false }} 
+        />
+          <Stack.Screen 
+          name="StudentProfile" 
+          component={StudentProfile} 
           options={{ headerShown: false }} 
         />
 
