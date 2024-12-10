@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   StyleSheet,
@@ -15,9 +15,15 @@ const AdminDashboard = () => {
   const navigation = useNavigation();
   const theme = useContext(themeContext);
 
-  // Navigate to Manage Authors screen
   const handleViewUsers = () => {
     navigation.navigate('ManageAuthors');
+  };
+
+  const handleLogout = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'LoginScreen' }],
+    });
   };
 
   return (
@@ -35,13 +41,21 @@ const AdminDashboard = () => {
             Admin Dashboard
           </Text>
         </View>
+        <Button
+          mode="contained"
+          onPress={handleLogout}
+          style={styles.logoutButton}
+          labelStyle={styles.logoutButtonText}
+        >
+          Logout
+        </Button>
       </View>
 
       {/* Admin Actions */}
       <ScrollView>
         <View style={styles.adminActionsContainer}>
           <Button mode="contained" onPress={handleViewUsers} style={styles.adminButton}>
-            Manage Authors
+            Manage Users
           </Button>
         </View>
       </ScrollView>
@@ -57,23 +71,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#638cbd',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     elevation: 8,
+    paddingRight: 10,
+    paddingVertical: 10,
   },
   logoContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    height: 100,
+    height: 80,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
   },
   mainText: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginLeft: -15,
-    marginTop: -10,
+    marginLeft: 10,
+  },
+  logoutButton: {
+    backgroundColor: '#d32f2f',
+    marginLeft: 'auto',
+  },
+  logoutButtonText: {
+    fontSize: 12,
   },
   adminActionsContainer: {
     marginTop: 20,
